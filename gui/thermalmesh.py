@@ -399,12 +399,15 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.update_progress(nb=100, text="Status: You can now process thermal images!")
 
     def load_project(self):
+
         try:
             self.app_folder = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory"))
             if self.app_folder != '':
                 _, name_folder = os.path.split(self.app_folder)
                 print(name_folder)
                 if name_folder == APP_FOLDER:
+
+
                     # add image folders
                     self.original_th_img_folder = os.path.join(self.app_folder, ORIGIN_TH_FOLDER)
                     self.rgb_crop_img_folder = os.path.join(self.app_folder, RGB_CROPPED_FOLDER)
@@ -789,8 +792,12 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
         # Hide dialog close button, to avoid conflicts with Open3D
         dialog.setWindowFlags((dialog.windowFlags() | QtCore.Qt.CustomizeWindowHint) & ~QtCore.Qt.WindowCloseButtonHint)
+        #dialog.resize(215, 500)
+        dialog.move(180,150)
+
 
         if dialog.exec_():
-            dialog.vis.destroy_window()
+            dialog.kill_vis()
         else:
-            dialog.vis.destroy_window()
+            dialog.kill_vis()
+

@@ -121,32 +121,39 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
         self.np_rgb = np_rgb
         self.np_ir_rgb = np.asarray(self.pcd.colors)
         print(self.np_ir_rgb)
+        self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
+
         print(self.np_rgb)
         self.vis = o3d.visualization.Visualizer()
-        self.vis.create_window(width=600, height=400)
+        self.vis.create_window(width=1000, height=700)
         self.vis.add_geometry(self.pcd)
         self.opt = self.vis.get_render_option()
-        self.ctr = self.vis.get_view_control()
+
         self.opt.point_size = 1
         self.rgb_mode = False
+        self.camera_ortho = False
 
         self.id = win32gui.FindWindowEx(0, 0, None, "Open3D")
-        #win32gui.ShowWindow(self.id, win32con.SW_MAXIMIZE) # maximize open3D window
+        #self.dialogid = win32gui.FindWindowEx(0, 0, None, "Visual options")
+        win32gui.ShowWindow(self.id, win32con.SW_MAXIMIZE) # maximize open3D window
         if self.id:
             hMenu = win32gui.GetSystemMenu(self.id, 0)
             if hMenu:
                 win32gui.DeleteMenu(hMenu, win32con.SC_CLOSE, win32con.MF_BYCOMMAND)
 
+        win32gui.MoveWindow(self.id, 485, 200, 1000, 700, True)
+        #win32gui.MoveWindow(self.dialogid, 0, 0, 215, 400, True)
 
         # add icons
         wid.add_icon(res.find('img/i_plus.png'), self.pushButton_ptplus)
         wid.add_icon(res.find('img/i_min.png'), self.pushButton_ptmin)
         wid.add_icon(res.find('img/i_palette.png'), self.pushButton_style)
         wid.add_icon(res.find('img/i_camera.png'), self.pushButton_captureview)
+        wid.add_icon(res.find('img/i_ortho.png'), self.pushButton_ortho)
 
-        timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_vis)
-        timer.start(1)
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_vis)
+        self.timer.start(1)
 
         # button actions
         self.buttonBox.accepted.connect(self.accept)
@@ -159,6 +166,7 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
         self.pushButton_ptplus.clicked.connect(self.points_size_plus)
         self.pushButton_ptmin.clicked.connect(self.points_size_min)
         self.pushButton_captureview.clicked.connect(self.capture_view)
+        self.pushButton_ortho.clicked.connect(self.toggle_camera)
 
     def capture_view(self):
         # use included open3d function
@@ -168,9 +176,10 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
 
 
     def update_vis(self):
-        # self.vis.update_geometry()
-        self.vis.poll_events()
+        self.vis.update_geometry(self.pcd)
         self.vis.update_renderer()
+        self.vis.poll_events()
+
 
     def points_size_plus(self):
         self.opt.point_size +=1
@@ -181,20 +190,31 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
             self.opt.point_size -= 1
         self.update_vis()
 
-    def change_color(self):
+    def toggle_camera(self):
+        if self.camera_ortho== False:
+            print('switch to orthographic')
+            self.vis.get_view_control().change_field_of_view(step=-90)
+            self.camera_ortho = True
+            self.update_vis()
+        else:
+            print('switch to perspective')
+            self.vis.get_view_control().change_field_of_view(step=60)
+            self.camera_ortho = False
+            self.update_vis()
 
-        #self.opt.point_color_option = o3d.visualization.PointColorOption.ZCoordinate
-        # self.update_vis()
+
+    def change_color(self):
         if not self.rgb_mode:
             print('switch to RGB')
             self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
-            self.vis.update_geometry(self.pcd)
             self.rgb_mode = True
+            self.update_vis()
         else:
             print('switch to IR')
+            self.pcd.paint_uniform_color([0.1,0.1,0.1])
             self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
-            self.vis.update_geometry(self.pcd)
             self.rgb_mode = False
+            self.update_vis()
 
         self.vis.poll_events()
         self.vis.update_renderer()
@@ -206,6 +226,10 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
         windows = []
         win32gui.EnumWindows(callback, None)
         return windows
+
+    def kill_vis(self):
+        self.timer.stop()
+        self.vis.destroy_window()
 
 
 class DialogMeshPreviewOpen(QtWidgets.QDialog):

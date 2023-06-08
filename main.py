@@ -35,7 +35,7 @@ def main(argv=None):
     window = ThermalWindow()
     window.setWindowTitle('IR Mapper')
     window.setWindowIcon(QtGui.QIcon(res.find('img/icone.png')))
-    window.show()
+    window.showMaximized()
 
     # run the application if necessary
     if (app):
