@@ -193,7 +193,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.rgb_crop_img_folder = ''
 
         # resetoverview
-        self.label_infos.setText = 'Overview:'
+        self.label_infos.setText('Overview:')
         self.general_overview = ''
 
         # reset actions
@@ -206,6 +206,8 @@ class ThermalWindow(QtWidgets.QMainWindow):
         size = QtCore.QSize(50, 50)
         self.treeView_files.setIconSize(size)
         self.selmod = self.treeView_files.selectionModel()
+
+        self.selmod.selectionChanged.connect(self.on_tree_change)
 
     def tree_doubleClicked(self):
         indexes = self.treeView_files.selectedIndexes()
@@ -407,6 +409,10 @@ class ThermalWindow(QtWidgets.QMainWindow):
                 print(name_folder)
                 if name_folder == APP_FOLDER:
 
+                    # rest project data
+                    folder = self.app_folder
+                    self.reset_project()
+                    self.app_folder = folder
 
                     # add image folders
                     self.original_th_img_folder = os.path.join(self.app_folder, ORIGIN_TH_FOLDER)
