@@ -240,18 +240,22 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
     def __init__(self,  pcd_load, np_rgb, parent=None):
         QtWidgets.QDialog.__init__(self)
         basepath = os.path.dirname(__file__)
-        basename = 'visu_'
+        basename = 'visu'
         uifile = os.path.join(basepath, 'ui/%s.ui' % basename)
         wid.loadUi(uifile, self)
 
         self.pcd = pcd_load
         self.np_rgb = np_rgb
         self.np_ir_rgb = np.asarray(self.pcd.colors)
+        self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
+
         self.vis = o3d.visualization.Visualizer()
         self.vis.create_window()
         self.vis.add_geometry(self.pcd)
         self.opt = self.vis.get_render_option()
+        self.opt.point_size = 1
         self.rgb_mode = False
+        self.camera_ortho = False
 
         self.id = win32gui.FindWindowEx(0, 0, None, "Open3D")
         widget = QtWidgets.QWidget()
@@ -266,10 +270,12 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
         wid.add_icon(res.find('img/i_plus.png'), self.pushButton_ptplus)
         wid.add_icon(res.find('img/i_min.png'), self.pushButton_ptmin)
         wid.add_icon(res.find('img/i_palette.png'), self.pushButton_style)
+        wid.add_icon(res.find('img/i_camera.png'), self.pushButton_captureview)
+        wid.add_icon(res.find('img/i_ortho.png'), self.pushButton_ortho)
 
-        timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_vis)
-        timer.start(1)
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_vis)
+        self.timer.start(1)
 
         # button actions
         self.buttonBox.accepted.connect(self.accept)
@@ -292,11 +298,30 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
         self.pushButton_style.clicked.connect(self.change_color)
         self.pushButton_ptplus.clicked.connect(self.points_size_plus)
         self.pushButton_ptmin.clicked.connect(self.points_size_min)
+        self.pushButton_captureview.clicked.connect(self.capture_view)
+        self.pushButton_ortho.clicked.connect(self.toggle_camera)
 
     def update_vis(self):
-        # self.vis.update_geometry()
         self.vis.poll_events()
         self.vis.update_renderer()
+
+    def capture_view(self):
+        # use included open3d function
+        dest_path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File As', 'render.jpg', "Image File (*.jpg)")
+        if dest_path[0]:
+            self.vis.capture_screen_image(dest_path[0], do_render=True)
+
+    def toggle_camera(self):
+        if self.camera_ortho== False:
+            print('switch to orthographic')
+            self.vis.get_view_control().change_field_of_view(step=-90)
+            self.camera_ortho = True
+            self.update_vis()
+        else:
+            print('switch to perspective')
+            self.vis.get_view_control().change_field_of_view(step=60)
+            self.camera_ortho = False
+            self.update_vis()
 
     def points_size_plus(self):
         self.opt.point_size +=1
@@ -308,20 +333,26 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
         self.update_vis()
 
     def change_color(self):
-
-        #self.opt.point_color_option = o3d.visualization.PointColorOption.ZCoordinate
-        # self.update_vis()
         if not self.rgb_mode:
+            print('switch to RGB')
             self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
-            self.vis.update_geometry(self.pcd)
             self.rgb_mode = True
-        else:
-            self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
             self.vis.update_geometry(self.pcd)
+            self.update_vis()
+        else:
+            print('switch to IR')
+            self.pcd.paint_uniform_color([0.1,0.1,0.1])
+            self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
             self.rgb_mode = False
+            self.vis.update_geometry(self.pcd)
+            self.update_vis()
 
         self.vis.poll_events()
         self.vis.update_renderer()
+
+    def kill_vis(self):
+        self.timer.stop()
+        self.vis.destroy_window()
 
     def enum_windows(self):
         def callback(wnd, data):

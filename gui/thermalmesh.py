@@ -787,13 +787,15 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
 
     def go_visu(self):
-        dialog = dia.DialogMeshPreviewOpenFree(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
+        dialog = dia.DialogMeshPreviewOpen(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
         dialog.setWindowTitle("Visual options")
 
         # Hide dialog close button, to avoid conflicts with Open3D
         dialog.setWindowFlags((dialog.windowFlags() | QtCore.Qt.CustomizeWindowHint) & ~QtCore.Qt.WindowCloseButtonHint)
         #dialog.resize(215, 500)
-        dialog.move(180,150)
+        #dialog.move(180,150)
+
+        dialog.showMaximized()
 
 
         if dialog.exec_():
