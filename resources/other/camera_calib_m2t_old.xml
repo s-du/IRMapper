@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<calibration>
+  <projection>frame</projection>
+  <width>640</width>
+  <height>512</height>
+  <f>753.04778781530342</f>
+  <cx>-3.7421566762536242</cx>
+  <cy>7.2795643781206145</cy>
+  <k1>-0.26232539157868939</k1>
+  <p1>0.00038453974695487804</p1>
+  <p2>-0.00037594666553633323</p2>
+  <date>2023-03-04T11:42:25Z</date>
+</calibration>

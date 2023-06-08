@@ -1,0 +1,144 @@
+
+<div id="sidebar_root" class="">
+	<div id="sidebar_header">
+	</div>
+	<div> 
+
+	<div id="potree_menu" class="accordion">
+
+		<!-- SCENE -->
+		<h3 id="menu_scene"><span data-i18n="tb.scene_opt"></span></h3>
+		<div class="pv-menu-list">
+
+			<div id="scene_export"></div>
+
+			<div class="divider"><span>Objects</span></div>
+
+			<div id="scene_objects"></div>
+
+		</div>
+		
+		<!-- APPEARANCE -->
+		<h3 id="menu_appearance"><span data-i18n="tb.rendering_opt"></span></h3>
+		<div>
+			<ul class="pv-menu-list">
+				<li><span data-i18n="appearance.nb_max_pts"></span>: <span id="lblPointBudget"></span> <div id="sldPointBudget"></div></li>
+				<li><span data-i18n="appearance.field_view"></span>: <span id="lblFOV"></span><div id="sldFOV"></div></li>
+
+				<div class="divider"><span>Eye-Dome-Lighting</span></div>
+
+				<li><label><input type="checkbox" id="chkEDLEnabled"/><span data-i18n="appearance.edl_enable"></span></label></li>
+				<li><span data-i18n="appearance.edl_radius"></span>: <span id="lblEDLRadius"></span><div id="sldEDLRadius"></div></li>
+				<li><span data-i18n="appearance.edl_strength"></span>: <span id="lblEDLStrength"></span><div id="sldEDLStrength"></div></li>
+
+				
+				<div class="divider"><span>Background</span></div>
+
+				<li>
+					<selectgroup id="background_options">
+						<option id="background_options_black" value="black">Black</option>
+						<option id="background_options_white" value="white">White</option>
+					</selectgroup>
+				</li>
+
+				<div class="divider"><span>Quality</span></div>
+
+				<li>
+					<selectgroup id="splat_quality_options">
+						<option id="splat_quality_options_standard" value="standard">Standard</option>
+						<option id="splat_quality_options_hq" value="hq">High Quality</option>
+					</selectgroup>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<!-- TOOLS -->
+		<h3 id="menu_tools"><span data-i18n="tb.tools_opt"></span></h3>
+		<div class="pv-menu-list">
+
+			<div class="divider"><span>Measurement</span></div>
+
+			<li id="tools"></li>
+			
+			<div class="divider"><span>Navigation</span></div>
+
+			<li id="navigation"></li>
+		</div>
+
+		
+
+		<!-- Classification -->
+		<h3 id="menu_filters"><span data-i18n="tb.filters_opt"></span></h3>
+		<div>
+
+			<div class="divider"><span>Classification</span></div>
+
+			<ul id="classificationList" class="pv-menu-list"></ul>
+
+			<div class="divider"><span>Returns</span></div>
+
+			<div id="return_filter_panel">
+				<ul class="pv-menu-list">
+					
+					<li><span data-i18n="filters.return_number"></span>: <span id="lblReturnNumber"></span> <div id="sldReturnNumber"></div></li>
+					<li><span data-i18n="filters.number_of_returns"></span>: <span id="lblNumberOfReturns"></span> <div id="sldNumberOfReturns"></div></li>
+
+				</ul>
+			</div>
+
+			<div class="divider"><span>Point Source ID</span></div>
+
+			<div>
+				<ul class="pv-menu-list" id="pointsourceid_filter_panel">
+
+				</ul>
+			</div>
+
+			<div class="divider"><span>GPS Time</span></div>
+
+			<div id="gpstime_filter_panel">
+
+				<ul class="pv-menu-list">
+					<div id="gpstime_multilevel_range_container">
+
+						<li>
+							<span style="display: flex">
+								<span>Time: </span>
+								<input id="txtGpsTime" type="text" style="margin: auto 10px"/>
+								<input id="btnFindGpsTime" type="button" value="find" />
+							</span>
+						</li>
+
+					</div>
+
+				</ul>
+
+			</div>
+		</div>
+		
+		
+
+	</div>
+
+	<div>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+		</div>
+	</div>
+	
+</div>
+
+
