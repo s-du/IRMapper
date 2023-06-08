@@ -71,17 +71,6 @@ class UncaughtHook(QtCore.QObject):
 qt_exception_hook = UncaughtHook()
 
 
-class StoppableHTTPServer(http.server.ThreadingHTTPServer):
-    def run(self):
-        try:
-            self.serve_forever()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            # Clean-up server (close socket, etc.)
-            self.server_close()
-
-
 class AboutDialog(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
@@ -113,15 +102,99 @@ class AboutDialog(QtWidgets.QDialog):
         self.setLayout(self.layout)
 
 
-class DialogMeshPreviewOpen(QtWidgets.QDialog):
+class DialogMeshPreviewOpen_free(QtWidgets.QDialog):
     """
-    Dialog that allows to visualize thermal mesh
+    Dialog that allows to visualize thermal mesh with open3d, with a floating window
     """
 
     def __init__(self,  pcd_load, np_rgb, parent=None):
         QtWidgets.QDialog.__init__(self)
         basepath = os.path.dirname(__file__)
-        basename = 'visu'
+        basename = 'visu_open_window'
+        uifile = os.path.join(basepath, 'ui/%s.ui' % basename)
+        wid.loadUi(uifile, self)
+
+        self.pcd = pcd_load
+        self.np_rgb = np_rgb
+        self.np_ir_rgb = np.asarray(self.pcd.colors)
+        self.vis = o3d.visualization.Visualizer()
+        self.vis.create_window()
+        self.vis.add_geometry(self.pcd)
+        self.opt = self.vis.get_render_option()
+        self.rgb_mode = False
+
+        self.id = win32gui.FindWindowEx(0, 0, None, "Open3D")
+        self.window = QtGui.QWindow.fromWinId(self.id)
+
+        # add icons
+        wid.add_icon(res.find('img/i_plus.png'), self.pushButton_ptplus)
+        wid.add_icon(res.find('img/i_min.png'), self.pushButton_ptmin)
+        wid.add_icon(res.find('img/i_palette.png'), self.pushButton_style)
+
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(self.update_vis)
+        timer.start(1)
+
+        # button actions
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.create_connections()
+
+
+    def create_connections(self):
+        self.pushButton_style.clicked.connect(self.change_color)
+        self.pushButton_ptplus.clicked.connect(self.points_size_plus)
+        self.pushButton_ptmin.clicked.connect(self.points_size_min)
+
+    def update_vis(self):
+        # self.vis.update_geometry()
+        self.vis.poll_events()
+        self.vis.update_renderer()
+
+    def points_size_plus(self):
+        self.opt.point_size +=1
+        self.update_vis()
+
+    def points_size_min(self):
+        if self.opt.point_size > 0:
+            self.opt.point_size -= 1
+        self.update_vis()
+
+    def change_color(self):
+
+        #self.opt.point_color_option = o3d.visualization.PointColorOption.ZCoordinate
+        # self.update_vis()
+        if not self.rgb_mode:
+            self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
+            self.vis.update_geometry(self.pcd)
+            self.rgb_mode = True
+        else:
+            self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
+            self.vis.update_geometry(self.pcd)
+            self.rgb_mode = False
+
+        self.vis.poll_events()
+        self.vis.update_renderer()
+
+    def enum_windows(self):
+        def callback(wnd, data):
+            windows.append(wnd)
+
+        windows = []
+        win32gui.EnumWindows(callback, None)
+        return windows
+
+
+class DialogMeshPreviewOpen(QtWidgets.QDialog):
+    """
+    Dialog that allows to visualize thermal mesh with open3D, with integrated window
+    """
+
+    def __init__(self,  pcd_load, np_rgb, parent=None):
+        QtWidgets.QDialog.__init__(self)
+        basepath = os.path.dirname(__file__)
+        basename = 'visu_'
         uifile = os.path.join(basepath, 'ui/%s.ui' % basename)
         wid.loadUi(uifile, self)
 
@@ -211,6 +284,7 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
         windows = []
         win32gui.EnumWindows(callback, None)
         return windows
+
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
     """

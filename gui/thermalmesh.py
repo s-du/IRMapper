@@ -149,7 +149,8 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.actionAbout.triggered.connect(self.show_info)
         self.actionAgisoft_license_path.triggered.connect(self.change_license)
 
-        self.actionViewMesh.triggered.connect(self.go_visu_potree)
+        # self.actionViewMesh.triggered.connect(self.go_visu_potree)  Potree use is possible
+        self.actionViewMesh.triggered.connect(self.go_visu)
         self.treeView_files.doubleClicked.connect(self.tree_doubleClicked)
         self.selmod.selectionChanged.connect(self.on_tree_change)
 
@@ -744,12 +745,14 @@ class ThermalWindow(QtWidgets.QMainWindow):
             pc_folder, _ = os.path.split(pc_path)
             self.reconstruction_database[-1].pc_folder = pc_folder
 
-            # self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(self.reconstruction_database[-1].pc_path)
+            self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(self.reconstruction_database[-1].pc_path)
+
             # read rgb point cloud
             rgb_ply_path = os.path.join(self.reconstruction_database[-1].path, 'thermal_point_cloud_rgb.ply')
-            # rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
-            # self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
+            rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
+            self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
 
+            """
             # create potree for thermal point cloud
             output_path = os.path.join(pc_folder, f'viewer')
             tt.potree_render_page(pc_path, output_path)
@@ -757,6 +760,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
             # add rgb cloud as data in potree
             output_path2 = os.path.join(output_path, 'pointclouds')
             tt.potree_add_cloud(rgb_ply_path, output_path2)
+            """
 
         self.update_progress(nb=100, text="Status: You can now visualise your data!")
 
@@ -782,7 +786,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
 
     def go_visu(self):
-        dialog = dia.DialogMeshPreviewOpen(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
+        dialog = dia.DialogMeshPreviewOpen_free(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
         dialog.setWindowTitle("Analyse your cloud")
 
         # Hide dialog close button, to avoid conflicts with Open3D
