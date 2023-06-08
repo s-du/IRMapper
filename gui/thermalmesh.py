@@ -6,8 +6,8 @@ from pathlib import Path
 
 # import Pyqt packages
 from PySide6 import QtCore, QtGui, QtWidgets
-import PySide6.QtWebEngineWidgets, PySide6.QtWebEngineCore
-PySide6.QtWebEngineCore.QWebEngineSettings.WebGLEnabled = True
+#import PySide6.QtWebEngineWidgets, PySide6.QtWebEngineCore
+#PySide6.QtWebEngineCore.QWebEngineSettings.WebGLEnabled = True
 
 import json
 
@@ -504,8 +504,6 @@ class ThermalWindow(QtWidgets.QMainWindow):
                             self.reconstruction_database[-1].has_mesh = opt_mesh
                             self.reconstruction_database[-1].files = threed_files
 
-
-
                             # add elements in treeview
                             self.add_item_in_tree(self.model, desc)
                             self.picture_dropped(threed_files, desc)
@@ -515,12 +513,12 @@ class ThermalWindow(QtWidgets.QMainWindow):
                                 # read output point cloud
                                 self.reconstruction_database[-1].pc_path = os.path.join(th_mesh_folder,
                                                                                         'thermal_point_cloud.ply')
-                                # self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(new_threed_folder.pc_path)
+                                self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(new_threed_folder.pc_path)
 
                                 # read rgb point cloud
                                 rgb_ply_path = os.path.join(th_mesh_folder, 'thermal_point_cloud_rgb.ply')
-                                # rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
-                                # self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
+                                rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
+                                self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
 
                                 pc_folder, _ = os.path.split(self.reconstruction_database[-1].pc_path)
                                 self.reconstruction_database[-1].pc_folder = pc_folder
@@ -786,11 +784,13 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
 
     def go_visu(self):
-        dialog = dia.DialogMeshPreviewOpen_free(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
-        dialog.setWindowTitle("Analyse your cloud")
+        dialog = dia.DialogMeshPreviewOpenFree(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
+        dialog.setWindowTitle("Visual options")
 
         # Hide dialog close button, to avoid conflicts with Open3D
         dialog.setWindowFlags((dialog.windowFlags() | QtCore.Qt.CustomizeWindowHint) & ~QtCore.Qt.WindowCloseButtonHint)
 
         if dialog.exec_():
+            dialog.vis.destroy_window()
+        else:
             dialog.vis.destroy_window()

@@ -48,7 +48,7 @@ def main(argv=None):
 if __name__ == '__main__':
     freeze_support()  # To avoid pipinstaller bug. Note: all libraries are imported after freeze_support
     from PySide6 import QtWidgets, QtGui
-    from PySide6 import QtWebEngineWidgets
+    # from PySide6 import QtWebEngineWidgets
     import os
     import sys
     import resources as res

@@ -2,17 +2,20 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6 import QtWebEngineWidgets
 
 import os
-import threading
-import http.server
-import socketserver
 import numpy as np
 import cv2
 import traceback
 import logging
 import open3d as o3d
-import win32gui
+import win32gui, win32con
 import sys
-from multiprocessing import Process
+from PIL import Image
+# import matplotlib.pyplot as plt
+
+# from multiprocessing import Process
+# import threading
+# import http.server
+# import socketserver
 
 # custom packages
 import resources as res
@@ -102,7 +105,7 @@ class AboutDialog(QtWidgets.QDialog):
         self.setLayout(self.layout)
 
 
-class DialogMeshPreviewOpen_free(QtWidgets.QDialog):
+class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
     """
     Dialog that allows to visualize thermal mesh with open3d, with a floating window
     """
@@ -117,19 +120,29 @@ class DialogMeshPreviewOpen_free(QtWidgets.QDialog):
         self.pcd = pcd_load
         self.np_rgb = np_rgb
         self.np_ir_rgb = np.asarray(self.pcd.colors)
+        print(self.np_ir_rgb)
+        print(self.np_rgb)
         self.vis = o3d.visualization.Visualizer()
-        self.vis.create_window()
+        self.vis.create_window(width=600, height=400)
         self.vis.add_geometry(self.pcd)
         self.opt = self.vis.get_render_option()
+        self.ctr = self.vis.get_view_control()
+        self.opt.point_size = 1
         self.rgb_mode = False
 
         self.id = win32gui.FindWindowEx(0, 0, None, "Open3D")
-        self.window = QtGui.QWindow.fromWinId(self.id)
+        #win32gui.ShowWindow(self.id, win32con.SW_MAXIMIZE) # maximize open3D window
+        if self.id:
+            hMenu = win32gui.GetSystemMenu(self.id, 0)
+            if hMenu:
+                win32gui.DeleteMenu(hMenu, win32con.SC_CLOSE, win32con.MF_BYCOMMAND)
+
 
         # add icons
         wid.add_icon(res.find('img/i_plus.png'), self.pushButton_ptplus)
         wid.add_icon(res.find('img/i_min.png'), self.pushButton_ptmin)
         wid.add_icon(res.find('img/i_palette.png'), self.pushButton_style)
+        wid.add_icon(res.find('img/i_camera.png'), self.pushButton_captureview)
 
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.update_vis)
@@ -141,11 +154,18 @@ class DialogMeshPreviewOpen_free(QtWidgets.QDialog):
 
         self.create_connections()
 
-
     def create_connections(self):
         self.pushButton_style.clicked.connect(self.change_color)
         self.pushButton_ptplus.clicked.connect(self.points_size_plus)
         self.pushButton_ptmin.clicked.connect(self.points_size_min)
+        self.pushButton_captureview.clicked.connect(self.capture_view)
+
+    def capture_view(self):
+        # use included open3d function
+        dest_path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File As', 'render.jpg', "Image File (*.jpg)")
+        if dest_path[0]:
+            self.vis.capture_screen_image(dest_path[0], do_render=True)
+
 
     def update_vis(self):
         # self.vis.update_geometry()
@@ -166,10 +186,12 @@ class DialogMeshPreviewOpen_free(QtWidgets.QDialog):
         #self.opt.point_color_option = o3d.visualization.PointColorOption.ZCoordinate
         # self.update_vis()
         if not self.rgb_mode:
+            print('switch to RGB')
             self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
             self.vis.update_geometry(self.pcd)
             self.rgb_mode = True
         else:
+            print('switch to IR')
             self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
             self.vis.update_geometry(self.pcd)
             self.rgb_mode = False
@@ -285,11 +307,9 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
         win32gui.EnumWindows(callback, None)
         return windows
 
-
+"""
 class MyHandler(http.server.SimpleHTTPRequestHandler):
-    """
-    Fix for pyinstaller (otherwise http.server causes crashes)
-    """
+#Fix for pyinstaller (otherwise http.server causes crashes)
     def log_message(self, format, *args):
         return
 
@@ -299,10 +319,6 @@ class RunnerSignals(QtCore.QObject):
     finished = QtCore.Signal()
 
 class DialogMeshPreviewPotree(QtWidgets.QDialog):
-    """
-    Dialog that allows to visualize thermal mesh
-    """
-
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self)
         basepath = os.path.dirname(__file__)
@@ -319,11 +335,7 @@ class DialogMeshPreviewPotree(QtWidgets.QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
     def http_launch(self, path):
-        """
-        A function to launch a http server active on the installation directory
-        :param path:
-        :return:
-        """
+        
         os.chdir(path)
         PORT = 8080
         Handler = MyHandler
@@ -348,10 +360,7 @@ class DialogMeshPreviewPotree(QtWidgets.QDialog):
     def closeEvent(self, event):
         print("X is clicked")
         self.stop_server()
-
-
-
-
+"""
 
 
 class DialogThParams(QtWidgets.QDialog):
