@@ -138,7 +138,7 @@ class Custom3dView:
     def __init__(self, cloud_rgb, cloud_ir):
 
         app = gui.Application.instance
-        self.window = app.create_window("Open3D - Stock viewer", 1024, 768)
+        self.window = app.create_window("Open3D - Infrared analyzer", 1024, 768)
 
         self.window.set_on_layout(self._on_layout)
         self.widget3d = gui.SceneWidget()
@@ -188,10 +188,13 @@ class Custom3dView:
         self._shader.add_item(self.materials_name[2])
         self._shader.add_item(self.materials_name[3])
         self._shader.set_on_selection_changed(self._on_shader)
+        combo_light = gui.Horiz(0, gui.Margins(0.25 * em, 0.25 * em, 0.25 * em, 0.25 * em))
+        combo_light.add_child(gui.Label("Rendering"))
+        combo_light.add_child(self._shader)
 
         # layout
         view_ctrls.add_child(self.switch)
-        view_ctrls.add_child(self._shader)
+        view_ctrls.add_child(combo_light)
         self.layout.add_child(view_ctrls)
         self.window.add_child(self.layout)
 
@@ -200,13 +203,13 @@ class Custom3dView:
         self.widget3d.setup_camera(60, bounds, center)
         self.widget3d.look_at(center, center + [0, 0, 40], [0, 0, 1])
         self.widget3d.set_on_mouse(self._on_mouse_widget3d)
-        self.widget3d.enable_scene_caching(False)
 
         # We are sizing the info label to be exactly the right size,
         # so since the text likely changed width, we need to
         # re-layout to set the new frame.
         self.window.set_needs_layout()
         self.widget3d.set_on_mouse(self._on_mouse_widget3d)
+
 
     def choose_material(self, is_enabled):
         pass
@@ -261,18 +264,15 @@ class Custom3dView:
         print(material)
         self.mat.shader = material
         self.widget3d.scene.update_material(self.mat)
+        self.widget3d.force_redraw()
 
     def _on_sun_dir(self, sun_dir):
         self.widget3d.scene.scene.set_sun_light(sun_dir, [1, 1, 1], 100000)
+        self.widget3d.force_redraw()
 
     def _on_mouse_widget3d(self, event):
         # We could override BUTTON_DOWN without a modifier, but that would
         # interfere with manipulating the scene.
-
-
-
-
-
         if event.type == gui.MouseEvent.Type.BUTTON_DOWN and event.is_modifier_down(
                 gui.KeyModifier.CTRL):
 
@@ -289,12 +289,17 @@ class Custom3dView:
 
                 if depth == 1.0:  # clicked on nothing (i.e. the far plane)
                     text = ""
+                    coords = []
                 else:
                     world = self.widget3d.scene.camera.unproject(
                         event.x, event.y, depth, self.widget3d.frame.width,
                         self.widget3d.frame.height)
                     text = "({:.3f}, {:.3f}, {:.3f})".format(
                         world[0], world[1], world[2])
+
+                    # add 3D label
+                    self.widget3d.add_3d_label(world, '._yeah')
+
 
                 # This is not called on the main thread, so we need to
                 # post to the main thread to safely access UI items.
@@ -310,6 +315,7 @@ class Custom3dView:
                     self.window, update_label)
 
             self.widget3d.scene.scene.render_to_depth_image(depth_callback)
+
             return gui.Widget.EventCallbackResult.HANDLED
         return gui.Widget.EventCallbackResult.IGNORED
 
