@@ -8,6 +8,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtWidgets
 #import PySide6.QtWebEngineWidgets, PySide6.QtWebEngineCore
 #PySide6.QtWebEngineCore.QWebEngineSettings.WebGLEnabled = True
+import open3d.visualization.gui as gui
 
 import json
 
@@ -519,15 +520,37 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
                             # point cloud specific operations
                             if opt_pc:
+                                subsample = False
+                                voxel = 0
                                 # read output point cloud
                                 self.reconstruction_database[-1].pc_path = os.path.join(th_mesh_folder,
                                                                                         'thermal_point_cloud.ply')
                                 self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(new_threed_folder.pc_path)
 
+                                #   check nb of points
+                                points_list = np.asarray(self.reconstruction_database[-1].pcd_load.points)
+                                n_points = len(points_list[:, 1])
+                                if n_points > 15_000_000:
+                                    subsample = True
+                                    sub = self.reconstruction_database[-1].pcd_load.voxel_down_sample(0.02)
+                                    points_list = np.asarray(sub.points)
+                                    n_points_sub = len(points_list[:, 1])
+                                    voxel = 0.02
+                                    if n_points_sub > 15_000_000:
+                                        sub = self.reconstruction_database[-1].pcd_load.voxel_down_sample(0.05)
+                                        voxel = 0.05
+                                    self.reconstruction_database[-1].pcd_load = sub
+
+
                                 # read rgb point cloud
                                 rgb_ply_path = os.path.join(th_mesh_folder, 'thermal_point_cloud_rgb.ply')
                                 rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
-                                self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
+                                self.reconstruction_database[-1].pcd_rgb_load = rgb_load
+
+                                #   check nb of points
+                                if subsample:
+                                    sub_rgb = self.reconstruction_database[-1].pcd_rgb_load.voxel_down_sample(voxel)
+                                    self.reconstruction_database[-1].pcd_rgb_load = sub_rgb
 
                                 pc_folder, _ = os.path.split(self.reconstruction_database[-1].pc_path)
                                 self.reconstruction_database[-1].pc_folder = pc_folder
@@ -793,7 +816,14 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
 
     def go_visu(self):
-        dialog = dia.DialogMeshPreviewOpen(self.current_dataset.pcd_load, self.current_dataset.np_rgb)
+        app_vis = gui.Application.instance
+        app_vis.initialize()
+
+        viz = wid.Custom3dView(self.current_dataset.pcd_rgb_load, self.current_dataset.pcd_load)
+        app_vis.run()
+
+    def go_visu_old(self):
+        dialog = dia.DialogMeshPreviewOpen(self.current_dataset.pcd_load, self.current_dataset.pcd_rgb_load)
         dialog.setWindowTitle("Visual options")
 
         # Hide dialog close button, to avoid conflicts with Open3D
@@ -802,7 +832,6 @@ class ThermalWindow(QtWidgets.QMainWindow):
         #dialog.move(180,150)
 
         dialog.showMaximized()
-
 
         if dialog.exec_():
             dialog.kill_vis()

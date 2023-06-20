@@ -110,20 +110,19 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
     Dialog that allows to visualize thermal mesh with open3d, with a floating window
     """
 
-    def __init__(self,  pcd_load, np_rgb, parent=None):
+    def __init__(self,  pcd_load, pcd_rgb_load, parent=None):
         QtWidgets.QDialog.__init__(self)
         basepath = os.path.dirname(__file__)
         basename = 'visu_open_window'
         uifile = os.path.join(basepath, 'ui/%s.ui' % basename)
         wid.loadUi(uifile, self)
 
-        self.pcd = pcd_load
-        self.np_rgb = np_rgb
-        self.np_ir_rgb = np.asarray(self.pcd.colors)
-        print(self.np_ir_rgb)
-        self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
+        self.pcd_ir = pcd_load
+        self.pcd_rgb = pcd_rgb_load
+        # self.np_rgb = np_rgb
+        # self.np_ir_rgb = np.asarray(self.pcd.colors)
+        # self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
 
-        print(self.np_rgb)
         self.vis = o3d.visualization.Visualizer()
         self.vis.create_window(width=1000, height=700)
         self.vis.add_geometry(self.pcd)
@@ -176,7 +175,6 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
 
 
     def update_vis(self):
-        self.vis.update_geometry(self.pcd)
         self.vis.update_renderer()
         self.vis.poll_events()
 
@@ -206,14 +204,19 @@ class DialogMeshPreviewOpenFree(QtWidgets.QDialog):
     def change_color(self):
         if not self.rgb_mode:
             print('switch to RGB')
-            self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
+            # self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
+            self.vis.remove_geometry(self.pcd_ir)
+            self.vis.add_geometry(self.pcd_rgb)
             self.rgb_mode = True
             self.update_vis()
         else:
             print('switch to IR')
-            self.pcd.paint_uniform_color([0.1,0.1,0.1])
-            self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
-            self.rgb_mode = False
+            self.vis.remove_geometry(self.pcd_rgb)
+            self.vis.add_geometry(self.pcd_ir)
+            # self.pcd.paint_uniform_color([0.1,0.1,0.1])
+            # self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
+            # self.rgb_mode = False
+
             self.update_vis()
 
         self.vis.poll_events()
@@ -237,21 +240,22 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
     Dialog that allows to visualize thermal mesh with open3D, with integrated window
     """
 
-    def __init__(self,  pcd_load, np_rgb, parent=None):
+    def __init__(self,  pcd_load, pcd_rgb_load, parent=None):
         QtWidgets.QDialog.__init__(self)
         basepath = os.path.dirname(__file__)
         basename = 'visu'
         uifile = os.path.join(basepath, 'ui/%s.ui' % basename)
         wid.loadUi(uifile, self)
 
-        self.pcd = pcd_load
-        self.np_rgb = np_rgb
-        self.np_ir_rgb = np.asarray(self.pcd.colors)
-        self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
+        self.pcd_ir = pcd_load
+        self.pcd_rgb = pcd_rgb_load
+        # self.np_rgb = np_rgb
+        # self.np_ir_rgb = np.asarray(self.pcd.colors)
+        # self.np_ir_rgb = self.np_ir_rgb.astype(np.float32)
 
         self.vis = o3d.visualization.Visualizer()
         self.vis.create_window()
-        self.vis.add_geometry(self.pcd)
+        self.vis.add_geometry(self.pcd_ir)
         self.opt = self.vis.get_render_option()
         self.opt.point_size = 1
         self.rgb_mode = False
@@ -335,16 +339,19 @@ class DialogMeshPreviewOpen(QtWidgets.QDialog):
     def change_color(self):
         if not self.rgb_mode:
             print('switch to RGB')
-            self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
+            # self.pcd.colors = o3d.utility.Vector3dVector(self.np_rgb)
+            self.vis.remove_geometry(self.pcd_ir)
+            self.vis.add_geometry(self.pcd_rgb)
             self.rgb_mode = True
-            self.vis.update_geometry(self.pcd)
             self.update_vis()
         else:
             print('switch to IR')
-            self.pcd.paint_uniform_color([0.1,0.1,0.1])
-            self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
-            self.rgb_mode = False
-            self.vis.update_geometry(self.pcd)
+            self.vis.remove_geometry(self.pcd_rgb)
+            self.vis.add_geometry(self.pcd_ir)
+            # self.pcd.paint_uniform_color([0.1,0.1,0.1])
+            # self.pcd.colors = o3d.utility.Vector3dVector(self.np_ir_rgb)
+            # self.rgb_mode = False
+
             self.update_vis()
 
         self.vis.poll_events()

@@ -5,7 +5,11 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
 
+import open3d.visualization.gui as gui
+import open3d.visualization.rendering as rendering
+
 import os
+import numpy as np
 
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -129,6 +133,188 @@ def loadUi(uifile, baseinstance=None, customWidgets=None,
     return widget
 
 
+# CUSTOM 3D VIEWER
+class Custom3dView:
+    def __init__(self, cloud_rgb, cloud_ir):
+
+        app = gui.Application.instance
+        self.window = app.create_window("Open3D - Stock viewer", 1024, 768)
+
+        self.window.set_on_layout(self._on_layout)
+        self.widget3d = gui.SceneWidget()
+        self.window.add_child(self.widget3d)
+
+        self.info = gui.Label("")
+        self.info.visible = False
+        self.window.add_child(self.info)
+
+        self.pcd_rgb = cloud_rgb
+        self.pc_ir = cloud_ir
+
+        self.widget3d.scene = rendering.Open3DScene(self.window.renderer)
+        self.widget3d.enable_scene_caching(True)
+        self.widget3d.scene.scene.set_sun_light(
+            [0.577, -0.577, -0.577],  # direction
+            [1, 1, 1],  # color
+            100000)  # intensity
+        self.widget3d.scene.scene.enable_sun_light(True)
+        self.widget3d.set_on_sun_direction_changed(self._on_sun_dir)
+
+        self.mat = rendering.MaterialRecord()
+        self.mat.shader = "defaultLit"
+        # Point size is in native pixels, but "pixel" means different things to
+        # different platforms (macOS, in particular), so multiply by Window scale
+        # factor.
+        self.mat.point_size = 3 * self.window.scaling
+        self.widget3d.scene.add_geometry("Point Cloud IR", self.pc_ir, self.mat)
+
+        self.rgb_shown = False
+
+        em = self.window.theme.font_size
+        self.layout = gui.Vert(0, gui.Margins(0.25 * em, 0.25 * em, 0.25 * em, 0.25 * em))
+        view_ctrls = gui.CollapsableVert("View controls", 0.25 * em,
+                                         gui.Margins(em, 0, 0, 0))
+
+        # add toggle for IR/RGB
+        self.switch = gui.ToggleSwitch("IR/RGB switch")
+        self.switch.set_on_clicked(self.toggle_visibility)
+
+        # add combo for lit/unlit/depth
+        self._shader = gui.Combobox()
+        self.materials = ["defaultLit", "defaultUnlit", "normals", "depth"]
+        self.materials_name = ['Sun Light', 'No light', 'Normals', 'Depth']
+        self._shader.add_item(self.materials_name[0])
+        self._shader.add_item(self.materials_name[1])
+        self._shader.add_item(self.materials_name[2])
+        self._shader.add_item(self.materials_name[3])
+        self._shader.set_on_selection_changed(self._on_shader)
+
+        # layout
+        view_ctrls.add_child(self.switch)
+        view_ctrls.add_child(self._shader)
+        self.layout.add_child(view_ctrls)
+        self.window.add_child(self.layout)
+
+        bounds = self.widget3d.scene.bounding_box
+        center = bounds.get_center()
+        self.widget3d.setup_camera(60, bounds, center)
+        self.widget3d.look_at(center, center + [0, 0, 40], [0, 0, 1])
+        self.widget3d.set_on_mouse(self._on_mouse_widget3d)
+        self.widget3d.enable_scene_caching(False)
+
+        # We are sizing the info label to be exactly the right size,
+        # so since the text likely changed width, we need to
+        # re-layout to set the new frame.
+        self.window.set_needs_layout()
+        self.widget3d.set_on_mouse(self._on_mouse_widget3d)
+
+    def choose_material(self, is_enabled):
+        pass
+
+    def toggle_visibility(self, is_enabled):
+        print('toggle')
+        if is_enabled:
+            self.widget3d.scene.add_geometry("Point Cloud RGB", self.pcd_rgb, self.mat)
+            self.widget3d.scene.remove_geometry("Point Cloud IR")
+            self.widget3d.force_redraw()
+            self.rgb_shown = True
+        else:
+            self.widget3d.scene.remove_geometry("Point Cloud RGB")
+            self.widget3d.scene.add_geometry("Point Cloud IR", self.pc_ir, self.mat)
+            self.widget3d.force_redraw()
+            self.rgb_shown = False
+
+    def toggle_visibility_old(self, is_enabled):
+        print('toggle')
+        if is_enabled:
+            self.widget3d.scene.show_geometry("Point Cloud IR", False)
+            self.widget3d.scene.show_geometry("Point Cloud RGB", True)
+            self.widget3d.force_redraw()
+            self.rgb_shown = True
+        else:
+            self.widget3d.scene.show_geometry("Point Cloud IR", True)
+            self.widget3d.scene.show_geometry("Point Cloud RGB", False)
+            self.widget3d.force_redraw()
+            self.rgb_shown = False
+
+    def _on_layout(self, layout_context):
+        r = self.window.content_rect
+        self.widget3d.frame = r
+        pref = self.info.calc_preferred_size(layout_context,
+                                             gui.Widget.Constraints())
+
+        width = 17 * layout_context.theme.font_size
+        height = min(
+            r.height,
+            self.layout.calc_preferred_size(
+                layout_context, gui.Widget.Constraints()).height)
+
+        self.layout.frame = gui.Rect(r.get_right() - width, r.y, width,
+                                              height)
+
+        self.info.frame = gui.Rect(r.x,
+                                   r.get_bottom() - pref.height, pref.width,
+                                   pref.height)
+
+    def _on_shader(self, name, index):
+        material = self.materials[index]
+        print(material)
+        self.mat.shader = material
+        self.widget3d.scene.update_material(self.mat)
+
+    def _on_sun_dir(self, sun_dir):
+        self.widget3d.scene.scene.set_sun_light(sun_dir, [1, 1, 1], 100000)
+
+    def _on_mouse_widget3d(self, event):
+        # We could override BUTTON_DOWN without a modifier, but that would
+        # interfere with manipulating the scene.
+
+
+
+
+
+        if event.type == gui.MouseEvent.Type.BUTTON_DOWN and event.is_modifier_down(
+                gui.KeyModifier.CTRL):
+
+            def depth_callback(depth_image):
+                # Coordinates are expressed in absolute coordinates of the
+                # window, but to dereference the image correctly we need them
+                # relative to the origin of the widget. Note that even if the
+                # scene widget is the only thing in the window, if a menubar
+                # exists it also takes up space in the window (except on macOS).
+                x = event.x - self.widget3d.frame.x
+                y = event.y - self.widget3d.frame.y
+                # Note that np.asarray() reverses the axes.
+                depth = np.asarray(depth_image)[y, x]
+
+                if depth == 1.0:  # clicked on nothing (i.e. the far plane)
+                    text = ""
+                else:
+                    world = self.widget3d.scene.camera.unproject(
+                        event.x, event.y, depth, self.widget3d.frame.width,
+                        self.widget3d.frame.height)
+                    text = "({:.3f}, {:.3f}, {:.3f})".format(
+                        world[0], world[1], world[2])
+
+                # This is not called on the main thread, so we need to
+                # post to the main thread to safely access UI items.
+                def update_label():
+                    self.info.text = text
+                    self.info.visible = (text != "")
+                    # We are sizing the info label to be exactly the right size,
+                    # so since the text likely changed width, we need to
+                    # re-layout to set the new frame.
+                    self.window.set_needs_layout()
+
+                gui.Application.instance.post_to_main_thread(
+                    self.window, update_label)
+
+            self.widget3d.scene.scene.render_to_depth_image(depth_callback)
+            return gui.Widget.EventCallbackResult.HANDLED
+        return gui.Widget.EventCallbackResult.IGNORED
+
+
+# CUSTOM 2D VIEWER
 class StandardItem(QStandardItem):
     def __init__(self, txt='', image_path='', font_size=10, set_bold=False, color=QColor(0, 0, 0)):
         super().__init__()
