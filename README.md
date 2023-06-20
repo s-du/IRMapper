@@ -35,6 +35,10 @@ A simple Windows setup file is also available in the 'Releases' section!
 ## User manual
 (coming soon)
 
+## Acknowledgements
+This project was made possible thanks to subsidies from the Brussels Capital Region, via Innoviris.
+Feel free to use or modify the code, in which case you can cite Buildwise and the Pointify project!
+
 ## TO DO
 
 - [ ] Implement thread system for progress bar (in progress)
