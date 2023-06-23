@@ -55,11 +55,11 @@ The app offers the following key features:
 
 Upcoming key features:
 
-**Image Analysis**:
+- **Image Analysis**:
     - Users can extract temperature data and generating temperature distribution maps from loaded images
     - The app allows users to define and select specific regions of interest within the thermal images for in-depth analysis.
 
-**3D reconstruction**
+- **3D reconstruction**:
     - Support added for WebODM 
 
 
