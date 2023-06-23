@@ -72,6 +72,20 @@ Alternatively:
 git clone https://github.com/s-du/IRMapper
 ```
 
+2. Navigate to the app directory:
+```
+cd app_directory
+```
+
+3. Install the required dependencies:
+```
+pip install -r requirements.txt
+```
+
+4. Run the app:
+```
+python main.py
+```
 
 ## User manual
 (coming soon)
@@ -92,13 +106,12 @@ Feel free to use or modify the code, in which case you can cite Buildwise and th
 
 ## TO DO
 
-- [ ] Implement thread system for progress bar (in progress)
+- [x] ~~Implement thread system for progress bar~~
 - [ ] Add a temperature legend in image processing
 - [ ] Standardized image processing methods (opencv / pillow / other)
 - [ ] Standardize naming convention (eg. ir or th)
-- [ ] Document code
+- [ ] Extensively document the code
 - [ ] Add Open Drone Map Support
-- [ ] Switch to Potree for point cloud visualization
 - [ ] Add Open CV Weka (--> Developed on the side)
 
 Main icon:
