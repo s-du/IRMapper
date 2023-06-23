@@ -1,7 +1,7 @@
 <a href="https://ibb.co/XZMXw3P"><img src="https://i.ibb.co/svzjB64/ir-Mapper2.png" alt="ir-Mapper2" border="0"></a>
 ## Introduction
 
-This is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry
+IRMapper is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry
 
 🌡️📈
 
