@@ -64,10 +64,13 @@ Upcoming key features:
 
 
 ## Installation instructions
-A simple Windows setup file is also available in the 'Releases' section!
+A simple Windows setup file is available in the 'Releases' section!
 
 Alternatively:
 1. Clone the repository:
+```
+git clone https://github.com/s-du/IRMapper
+```
 
 
 ## User manual
