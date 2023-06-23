@@ -37,30 +37,30 @@ The app offers the following key features:
     - Users can easily load thermal images by importing a folder with RGB/IR pairs, directly exported from the drone SD card.
   
 2. Image Visualization:
-  - The app provides tools to visualize the loaded thermal images, including zooming, panning, and scaling options.
+    - The app provides tools to visualize the loaded thermal images, including zooming, panning, and scaling options.
 
 3. Image Enhancement:
-  - Users can adjust the temperature scale and colour palettes
-  - Users can apply various image enhancement techniques to improve the quality and clarity of thermal images.
+    - Users can adjust the temperature scale and colour palettes
+    - Users can apply various image enhancement techniques to improve the quality and clarity of thermal images.
   
 4. Image batch processing:
-  - The app enables users to perform batch processing of thermal images. It allows to obtain a dataset compatible with 3D photogrammetry.
+    - The app enables users to perform batch processing of thermal images. It allows to obtain a dataset compatible with 3D photogrammetry.
 
 5. 3D reconstruction
-  - Users can choose a thermal image set and create a 3D reconstruction of the captured zone. This phase relies on Agisoft Metashape API (https://www.agisoft.com/pdf/metashape_python_api_2_0_2.pdf)
+    - Users can choose a thermal image set and create a 3D reconstruction of the captured zone. This phase relies on Agisoft Metashape API (https://www.agisoft.com/pdf/metashape_python_api_2_0_2.pdf)
 
 6. 3D Visualization
-  - Users can visualize the 3D reconstruction in a simple 3D viewer.
-  - Some visual options: colour/infrared switch, type of render, ...
+    - Users can visualize the 3D reconstruction in a simple 3D viewer.
+    - Some visual options: colour/infrared switch, type of render, ...
 
 Upcoming key features:
 
 **Image Analysis**:
-  - Users can extract temperature data and generating temperature distribution maps from loaded images
-  - The app allows users to define and select specific regions of interest within the thermal images for in-depth analysis.
+    - Users can extract temperature data and generating temperature distribution maps from loaded images
+    - The app allows users to define and select specific regions of interest within the thermal images for in-depth analysis.
 
 **3D reconstruction**
-  - Support added for WebODM 
+    - Support added for WebODM 
 
 
 ## Installation instructions
