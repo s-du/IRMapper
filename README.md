@@ -33,23 +33,23 @@ From infrared images with a consistant temperature range, it is possibile to rec
 ## Features
 The app offers the following key features:
 
-1. **Image Loading**:
+1. Image Loading:
   - Users can easily load thermal images by importing a folder with RGB/IR pairs, directly exported from the drone SD card.
   
-2. **Image Visualization**:
+2. Image Visualization:
   - The app provides tools to visualize the loaded thermal images, including zooming, panning, and scaling options.
 
-3. **Image Enhancement**:
+3. Image Enhancement:
   - Users can adjust the temperature scale and colour palettes
   - Users can apply various image enhancement techniques to improve the quality and clarity of thermal images.
   
-4. **Image batch processing**:
+4. Image batch processing:
   - The app enables users to perform batch processing of thermal images. It allows to obtain a dataset compatible with 3D photogrammetry.
 
-5. **3D reconstruction**
+5. 3D reconstruction
   - Users can choose a thermal image set and create a 3D reconstruction of the captured zone. This phase relies on Agisoft Metashape API (https://www.agisoft.com/pdf/metashape_python_api_2_0_2.pdf)
 
-6. **3D Visualization**
+6. 3D Visualization
   - Users can visualize the 3D reconstruction in a simple 3D viewer.
   - Some visual options: colour/infrared switch, type of render, ...
 
