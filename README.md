@@ -34,7 +34,7 @@ From infrared images with a consistant temperature range, it is possibile to rec
 The app offers the following key features:
 
 1. Image Loading:
-  - Users can easily load thermal images by importing a folder with RGB/IR pairs, directly exported from the drone SD card.
+    - Users can easily load thermal images by importing a folder with RGB/IR pairs, directly exported from the drone SD card.
   
 2. Image Visualization:
   - The app provides tools to visualize the loaded thermal images, including zooming, panning, and scaling options.
