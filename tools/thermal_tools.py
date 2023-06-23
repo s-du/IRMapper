@@ -540,9 +540,9 @@ def read_dji_image(img_in, raw_out, param={'emissivity': 0.95, 'distance': 5, 'h
          "float32", "--distance", f"{dist}", "--humidity", f"{rh}", "--reflection", f"{refl_temp}",
          "--emissivity", f"{em}"],
         universal_newlines=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-        shell=True
+        #stdout=subprocess.DEVNULL,
+        #stderr=subprocess.STDOUT,
+        #shell=True
     )
 
 
