@@ -18,7 +18,7 @@ Point clouds with integrated infrared data can be generated for the exterior of 
 
 ![Picture1.png](https://i.postimg.cc/ryBngFn4/Picture1.png)
 
-Here, starting from a DJI image folder (typically ..._T.JPEG alternating with ..._W.JPEG), the application will guide the user to reconstruct a infrared point cloud.
+*Here, starting from a DJI image folder (typically ..._T.JPEG alternating with ..._W.JPEG), the application will guide the user to reconstruct a infrared point cloud.*
 
 ### Step 1: Processing of images
 First, the collected IR images have to be modified before entering the photogrammetry process. This phase was essential because of the highly processed nature of the R-JPG images coming out of the DJI M2EA/ DJI M3T drone. The temperature scale is the most critical parameter here. In order to guarantee an optimal integration of the thermal information into the 3D process, it is imperative to have a fixed temperature scale on the whole photoset (which is not the case by default). **This app allows batch processing of infrared images**, making photosets more easily compatible with photogrammetric processes.
