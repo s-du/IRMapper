@@ -3,6 +3,7 @@
 ## Introduction
 
 This is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry. 🌡️📈
+
 Note: At the moment, the application is compatible with the following drones models:
 - DJI Mavic 2 Enterprise Advanced
 - DJI Mavic 3T
