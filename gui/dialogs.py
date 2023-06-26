@@ -7,7 +7,7 @@ import cv2
 import traceback
 import logging
 import open3d as o3d
-import win32gui, win32con
+#import win32gui, win32con
 import sys
 from PIL import Image
 # import matplotlib.pyplot as plt
@@ -16,6 +16,11 @@ from PIL import Image
 # import threading
 # import http.server
 # import socketserver
+import platform
+if platform.system() == 'Windows':
+    import win32gui
+    import win32con
+
 
 # custom packages
 import resources as res
