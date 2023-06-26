@@ -1,6 +1,7 @@
 <p align="center">
     <a href="https://ibb.co/XZMXw3P"><img src="https://i.ibb.co/svzjB64/ir-Mapper2.png" alt="ir-Mapper2" border="0"></a>
 </p>
+
 ## Introduction
 
 IRMapper is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry*
@@ -14,6 +15,8 @@ Note: At the moment, the application is compatible with the following drones mod
 *The application uses **Agisoft Metashape Python API** but we are working on Open Drone Map integration!
 
 **We are still looking for photoset taken with the DJI M3T to improve calibration!
+
+**The project is still in pre-release, so do not hesitate to send your recommendations or the bugs you encountered!**
 
 <p align="center">
     <a href="https://ibb.co/MfKBYKL"><img src="https://i.ibb.co/ScHfhHp/Thermal-Mesh.png" alt="Thermal-Mesh" border="0"></a>
