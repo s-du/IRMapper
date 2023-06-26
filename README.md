@@ -116,7 +116,7 @@ Feel free to use or modify the code, in which case you can cite Buildwise and th
 - [ ] Add Open Drone Map Support
 - [ ] Add Open CV Weka (--> Developed on the side)
 
-Main icon:
-<a href="https://www.flaticon.com/free-icons/miscellaneous" title="miscellaneous icons">Miscellaneous icons created by Vectors Market - Flaticon</a>
 
-![wtc-00001-l-horizontaal-pos-rgb.png](https://i.postimg.cc/zDy3VjNJ/wtc-00001-l-horizontaal-pos-rgb.png)
+<a href="https://ibb.co/51mvcNW"><img src="https://i.ibb.co/RgfPHxp/combi-pointify.png" alt="combi-pointify" border="0"></a>
+
+
