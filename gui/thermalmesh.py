@@ -11,6 +11,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import open3d.visualization.gui as gui
 
 import json
+import platformdirs
 
 # import custom packages
 import resources as res
@@ -63,6 +64,12 @@ class ThreedDataset:
             sort_keys=True, indent=4)
 
 
+def show_info():
+    dialog = dia.AboutDialog()
+    if dialog.exec_():
+        pass
+
+
 class ThermalWindow(QtWidgets.QMainWindow):
     """
     Main Window class for the Pointify application.
@@ -108,6 +115,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.th_threed_folders = []  # list of folders containing thermal meshes
         self.current_dataset = None
         self.reconstruction_database = []  # storing all reconstruction datasets
+        self.drone_model = ''
 
         # create overview description
         self.general_overview = ''
@@ -122,7 +130,12 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.rgb_crop_img_folder = ''
 
         # Read Agisoft license (if defined)
-        self.license_loc = res.find('other/license_location.txt') # TODO : use settings.json
+        settings_dir = platformdirs.user_config_dir('IRMapper')
+        print(f"User config files should be stored in {platformdirs.user_config_dir('IRMapper')}")
+        if not os.path.exists(settings_dir):
+            os.mkdir(settings_dir)
+
+        self.license_loc = os.path.join(settings_dir, 'license_location.txt') # TODO : use settings.json
 
         if not os.path.exists(self.license_loc):
             self.license_path = None
@@ -147,12 +160,12 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.actionLoadProject.triggered.connect(self.load_project)
         self.actionProcessImages.triggered.connect(self.go_img_phase1)
         self.actionGo3D.triggered.connect(self.go_mesh_phase1)
-        self.actionAbout.triggered.connect(self.show_info)
+        self.actionAbout.triggered.connect(show_info)
         self.actionAgisoft_license_path.triggered.connect(self.change_license)
 
         # self.actionViewMesh.triggered.connect(self.go_visu_potree)  Potree use is possible
         self.actionViewMesh.triggered.connect(self.go_visu)
-        self.treeView_files.doubleClicked.connect(self.tree_doubleClicked)
+        self.treeView_files.doubleClicked.connect(self.tree_double_clicked)
         self.selmod.selectionChanged.connect(self.on_tree_change)
 
     def change_license(self):
@@ -193,7 +206,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.original_th_img_folder = ''
         self.rgb_crop_img_folder = ''
 
-        # resetoverview
+        # reset overview
         self.label_infos.setText('Overview:')
         self.general_overview = ''
 
@@ -210,7 +223,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
         self.selmod.selectionChanged.connect(self.on_tree_change)
 
-    def tree_doubleClicked(self):
+    def tree_double_clicked(self):
         indexes = self.treeView_files.selectedIndexes()
         sel_item = self.model.itemFromIndex(indexes[0])
         print(indexes[0])
@@ -230,11 +243,6 @@ class ThermalWindow(QtWidgets.QMainWindow):
             json_object = json.load(f)
 
         return json_object
-
-    def show_info(self):
-        dialog = dia.AboutDialog()
-        if dialog.exec_():
-            pass
 
     def update_progress(self, nb=None, text=''):
         self.label_status.setText(text)
@@ -284,9 +292,6 @@ class ThermalWindow(QtWidgets.QMainWindow):
         else:
             self.actionViewMesh.setEnabled(False)
 
-
-    # thread methods
-
     # Workflow Methods_____________________
     def load_img_phase1(self):
         ok_load = True
@@ -329,11 +334,11 @@ class ThermalWindow(QtWidgets.QMainWindow):
                 # update json path
                 self.json_file = os.path.join(self.app_folder, 'data.json')
 
-                # create some subfolders for storing images
+                # create some sub folders for storing images
                 self.original_th_img_folder = os.path.join(self.app_folder, ORIGIN_TH_FOLDER)
                 self.rgb_crop_img_folder = os.path.join(self.app_folder, RGB_CROPPED_FOLDER)
 
-                # if the subfolders do not exist, create them
+                # if the sub folders do not exist, create them
                 if not os.path.exists(self.app_folder):
                     os.mkdir(self.app_folder)
                 if not os.path.exists(self.original_th_img_folder):
@@ -527,7 +532,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
                                                                                         'thermal_point_cloud.ply')
                                 self.reconstruction_database[-1].pcd_load = o3d.io.read_point_cloud(new_threed_folder.pc_path)
 
-                                #   check nb of points
+                                #   check nb of points, and subsample if needed
                                 points_list = np.asarray(self.reconstruction_database[-1].pcd_load.points)
                                 n_points = len(points_list[:, 1])
                                 if n_points > 15_000_000:
@@ -780,7 +785,31 @@ class ThermalWindow(QtWidgets.QMainWindow):
             # read rgb point cloud
             rgb_ply_path = os.path.join(self.reconstruction_database[-1].path, 'thermal_point_cloud_rgb.ply')
             rgb_load = o3d.io.read_point_cloud(rgb_ply_path)
-            self.reconstruction_database[-1].np_rgb = np.asarray(rgb_load.colors)
+            self.reconstruction_database[-1].pcd_rgb_load = rgb_load
+
+            subsample = False
+
+            #   check nb of points, and subsample if needed
+            points_list = np.asarray(self.reconstruction_database[-1].pcd_load.points)
+            n_points = len(points_list[:, 1])
+            if n_points > 15_000_000:
+                subsample = True
+                sub = self.reconstruction_database[-1].pcd_load.voxel_down_sample(0.02)
+                points_list = np.asarray(sub.points)
+                n_points_sub = len(points_list[:, 1])
+                voxel = 0.02
+                if n_points_sub > 15_000_000:
+                    sub = self.reconstruction_database[-1].pcd_load.voxel_down_sample(0.05)
+                    voxel = 0.05
+                self.reconstruction_database[-1].pcd_load = sub
+
+            #   check nb of points
+            if subsample:
+                sub_rgb = self.reconstruction_database[-1].pcd_rgb_load.voxel_down_sample(voxel)
+                self.reconstruction_database[-1].pcd_rgb_load = sub_rgb
+
+            pc_folder, _ = os.path.split(self.reconstruction_database[-1].pc_path)
+            self.reconstruction_database[-1].pc_folder = pc_folder
 
             """
             # create potree for thermal point cloud
