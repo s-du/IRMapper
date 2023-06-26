@@ -3,7 +3,6 @@ from PySide6 import QtWebEngineWidgets
 
 import os
 import numpy as np
-import cv2
 import traceback
 import logging
 import open3d as o3d
@@ -700,11 +699,11 @@ class DialogPrepareImages(QtWidgets.QDialog):
                                       rgb_path=read_path)
 
             if v == 1:
-                cv_img = cv2.imread(dest_path)
+                cv_img = tt.cv_read_all_path(dest_path)
 
                 if post_process != 'edge (from rgb)':
                     undis = tt.undis(cv_img, ir_xml_path)
-                    cv2.imwrite(dest_path, undis)
+                    tt.cv_write_all_path(undis, dest_path)
 
                 self.viewer.setPhoto(QtGui.QPixmap(dest_path))
             else:

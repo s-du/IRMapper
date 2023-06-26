@@ -122,7 +122,7 @@ class RunnerMiniature(QtCore.QRunnable):
             # update progress
             self.signals.progressed.emit(self.start + iter)
             self.signals.messaged.emit(f'Pre-processing image {i}/{nb_im}')
-            cv_rgb_img = cv2.imread(rgb_path)
+            cv_rgb_img = cv_read_all_path(rgb_path)
 
             und = undis(cv_rgb_img, rgb_xml_path)
             crop = match_rgb(und, self.drone_model)
@@ -135,7 +135,8 @@ class RunnerMiniature(QtCore.QRunnable):
             new_name = file[:-4] + 'crop.JPG'
 
             dest_path = os.path.join(self.dest_crop_folder, new_name)
-            cv2.imwrite(dest_path, crop)
+
+            cv_write_all_path(crop, dest_path)
 
         self.signals.finished.emit()
 
@@ -200,6 +201,17 @@ def get_resolution(img_path):
 
 
 # LENS RELATED METHODS (GENERAL)
+def cv_read_all_path(path):
+    """
+    Allows reading image from any kind of unicode character (useful for french accents, for example)
+    """
+    img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+    return img
+
+def cv_write_all_path(img, path):
+    is_success, im_buf_arr = cv2.imencode(".JPG", img)
+    im_buf_arr.tofile(path)
+
 def undis(cv_img, xml_path):
     def read_matrices(xml_path):
         cv_file = cv2.FileStorage(xml_path, cv2.FILE_STORAGE_READ)
@@ -405,12 +417,13 @@ def create_undis_folder(list_ir_paths, drone_model, dest_und_folder):
         ir_xml_path = m3t_ir_xml_path
 
     for ir_path in list_ir_paths:
-        cv_ir_img = cv2.imread(ir_path)
+        cv_ir_img = cv_read_all_path(ir_path)
         cv_und = undis(cv_ir_img, ir_xml_path)
         _, file = os.path.split(ir_path)
         new_name = file[:-4] + 'undis.JPG'
         dest_path = os.path.join(dest_und_folder, new_name)
-        cv2.imwrite(dest_path, cv_und)
+        cv_write_all_path(cv_und, dest_path)
+
 
 
 def create_rgb_crop_folder(list_rgb_paths, drone_model, scale_percent, dest_crop_folder, progressbar, start, stop):
@@ -419,7 +432,7 @@ def create_rgb_crop_folder(list_rgb_paths, drone_model, scale_percent, dest_crop
     for i, rgb_path in enumerate(list_rgb_paths):
         iter = i * (stop - start) / nb_im
         progressbar.setProperty("value", start + iter)
-        cv_rgb_img = cv2.imread(rgb_path)
+        cv_rgb_img = cv_read_all_path(rgb_path)
 
         if drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':
             rgb_xml_path = m2t_rgb_xml_path
@@ -611,7 +624,7 @@ def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tma
         img_th_smooth.save(dest_path)
     elif post_process == 'edge (from rgb)':
         img_thermal.save(dest_path)
-        cv_ir_img = cv2.imread(dest_path)
+        cv_ir_img = cv_read_all_path(dest_path)
 
         if drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':
             ir_xml_path = m2t_ir_xml_path
@@ -621,7 +634,7 @@ def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tma
             rgb_xml_path = m3t_rgb_xml_path
 
         cv_ir_img = undis(cv_ir_img, ir_xml_path)
-        cv_match_rgb_img = cv2.imread(rgb_path)
+        cv_match_rgb_img = cv_read_all_path(rgb_path)
         add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path)
 
     # elif post_process == 'superpixel':
