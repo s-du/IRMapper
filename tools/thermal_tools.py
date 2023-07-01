@@ -264,7 +264,7 @@ def match_rgb(cv_img, drone_model, resized=False):
     return rgb_dest
 
 
-def add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path):
+def add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path, exif=None):
     img_gray = cv2.cvtColor(cv_match_rgb_img, cv2.COLOR_BGR2GRAY)
 
     # Blur the image for better edge detection
@@ -306,7 +306,10 @@ def add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path):
     blended_img_raw = Image.fromarray(blended_img)
     blended_img_raw = blended_img_raw.convert('RGB')
 
-    blended_img_raw.save(dest_path)
+    if exif is None:
+        blended_img_raw.save(dest_path)
+    else:
+        blended_img_raw.save(dest_path, exif=exif)
 
 
 # PATH AND PREPARATION METHODS
@@ -558,13 +561,18 @@ def read_dji_image(img_in, raw_out, param={'emissivity': 0.95, 'distance': 5, 'h
         shell=True
     )
 
+    image = Image.open(img_in)
+    exif = image.info['exif']
+
+    return exif
+
 
 def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tmax, colormap, color_high,
                            color_low, n_colors=256, post_process='none', rgb_path=''):
     _, filename = os.path.split(str(ir_img_path))
     new_raw_path = Path(str(ir_img_path)[:-4] + '.raw')
 
-    read_dji_image(str(ir_img_path), str(new_raw_path), param=param)
+    exif = read_dji_image(str(ir_img_path), str(new_raw_path), param=param)
 
     # read raw dji output
     fd = open(new_raw_path, 'rb')
@@ -592,14 +600,14 @@ def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tma
     img_thermal = Image.fromarray(thermal_cmap[:, :, [0, 1, 2]])
 
     if post_process == 'none':
-        img_thermal.save(dest_path)
+        img_thermal.save(dest_path, exif=exif)
     elif post_process == 'sharpen':
         img_th_sharpened = img_thermal.filter(ImageFilter.SHARPEN)
-        img_th_sharpened.save(dest_path)
+        img_th_sharpened.save(dest_path, exif=exif)
     elif post_process == 'sharpen strong':
         img_th_sharpened = img_thermal.filter(ImageFilter.SHARPEN)
         img_th_sharpened2 = img_th_sharpened.filter(ImageFilter.SHARPEN)
-        img_th_sharpened2.save(dest_path)
+        img_th_sharpened2.save(dest_path, exif=exif)
     elif post_process == 'edge (simple)':
         img_th_smooth = img_thermal.filter(ImageFilter.SMOOTH)
         img_th_findedge = img_th_smooth.filter(ImageFilter.Kernel((3, 3), (-1, -1, -1, -1, 8,
@@ -618,10 +626,10 @@ def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tma
         blended_img = np.uint8(blended)
         blended_img_raw = Image.fromarray(blended_img)
         blended_img_raw = blended_img_raw.convert('RGB')
-        blended_img_raw.save(dest_path)
+        blended_img_raw.save(dest_path, exif=exif)
     elif post_process == 'smooth':
         img_th_smooth = img_thermal.filter(ImageFilter.SMOOTH)
-        img_th_smooth.save(dest_path)
+        img_th_smooth.save(dest_path, exif=exif)
     elif post_process == 'edge (from rgb)':
         img_thermal.save(dest_path)
         cv_ir_img = cv_read_all_path(dest_path)
@@ -635,7 +643,7 @@ def process_one_th_picture(param, drone_model, ir_img_path, dest_path, tmin, tma
 
         cv_ir_img = undis(cv_ir_img, ir_xml_path)
         cv_match_rgb_img = cv_read_all_path(rgb_path)
-        add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path)
+        add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path, exif=exif)
 
     # elif post_process == 'superpixel':
     #    img_th_fz = superpixel(img_thermal)
