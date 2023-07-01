@@ -1,26 +1,37 @@
-<a href="https://ibb.co/XZMXw3P"><img src="https://i.ibb.co/svzjB64/ir-Mapper2.png" alt="ir-Mapper2" border="0"></a>
+<p align="center">
+    <a href="https://ibb.co/XZMXw3P"><img src="https://i.ibb.co/svzjB64/ir-Mapper2.png" alt="ir-Mapper2" border="0"></a>
+</p>
+
 ## Introduction
 
-IRMapper is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry
+IRMapper is a Pyside6 application for creating thermal pointclouds from an RGB/IR image folder, using photogrammetry*
 
 🌡️📈
 
 Note: At the moment, the application is compatible with the following drones models:
 - DJI Mavic 2 Enterprise Advanced
-- DJI Mavic 3T
+- DJI Mavic 3T (still being calibrated, not optimal results at the moment**)
 
-The application uses **Agisoft Metashape Python API** but we are working on Open Drone Map integration!
+*The application uses **Agisoft Metashape Python API** but we are working on Open Drone Map integration!
 
-<a href="https://ibb.co/MfKBYKL"><img src="https://i.ibb.co/ScHfhHp/Thermal-Mesh.png" alt="Thermal-Mesh" border="0"></a>
+**We are still looking for photoset taken with the DJI M3T to improve calibration!
 
-*GUI for thermal photogrammetry*
+**The project is still in pre-release, so do not hesitate to send your recommendations or the bugs you encountered!**
+
+<p align="center">
+    <a href="https://ibb.co/MfKBYKL"><img src="https://i.ibb.co/ScHfhHp/Thermal-Mesh.png" alt="Thermal-Mesh" border="0"></a>
+    
+    GUI for thermal photogrammetry
+</p>
+
 
 ## Principle
 Point clouds with integrated infrared data can be generated for the exterior of the buildings, but also for the interior. In addition to highlighting potential thermal weaknesses of the envelope, the processing of such point clouds also allows new types of analysis.
-
-![Picture1.png](https://i.postimg.cc/ryBngFn4/Picture1.png)
-
-*Here, starting from a DJI image folder (typically ..._T.JPEG alternating with ..._W.JPEG), the application will guide the user to reconstruct a infrared point cloud.*
+<p align="center">
+    <a href=https://i.postimg.cc/ryBngFn4/Picture1.png><img src="https://i.postimg.cc/ryBngFn4/Picture1.png" border="0"></a> 
+    
+    Here, starting from a DJI image folder (typically ..._T.JPEG alternating with ..._W.JPEG), the application will guide the user to reconstruct a infrared point cloud
+</p>
 
 ### Step 1: Processing of images
 First, the collected IR images have to be modified before entering the photogrammetry process. This phase was essential because of the highly processed nature of the R-JPG images coming out of the DJI M2EA/ DJI M3T drone. The temperature scale is the most critical parameter here. In order to guarantee an optimal integration of the thermal information into the 3D process, it is imperative to have a fixed temperature scale on the whole photoset (which is not the case by default). **This app allows batch processing of infrared images**, making photosets more easily compatible with photogrammetric processes.
@@ -28,9 +39,11 @@ First, the collected IR images have to be modified before entering the photogram
 ### Step 2: 3D reconstruction
 From infrared images with a consistant temperature range, it is possibile to obtain accurate 3D models. First, this implies that **pairs of images** are captured: Colour + Infrared images at each shot. This is the default behaviour of DJI thermal drones. Secondly, the photogrammetric process requires to have a significant overlap between individual shots. When regular RGB pictures are used, 75% overlap can be judged satisfactory. With IR/RGB pairs, it is advised to increase the overlap, because the field of view is smaller on IR pictures. 
 
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/T8HKHVP/field.png" alt="field" border="0"></a>
-
-*Difference in terms of field of view between thermal and colour pictures*
+<p align="center">
+    <a href="https://imgbb.com/"><img src="https://i.ibb.co/T8HKHVP/field.png" alt="field" border="0"></a>
+    
+    Difference in terms of field of view between thermal and colour pictures
+</p>
 
 ## Features
 The app offers the following key features:
@@ -116,7 +129,7 @@ Feel free to use or modify the code, in which case you can cite Buildwise and th
 - [ ] Add Open Drone Map Support
 - [ ] Add Open CV Weka (--> Developed on the side)
 
-
-<a href="https://ibb.co/51mvcNW"><img src="https://i.ibb.co/RgfPHxp/combi-pointify.png" alt="combi-pointify" border="0"></a>
-
+<p align="center">
+    <a href="https://ibb.co/51mvcNW"><img src="https://i.ibb.co/RgfPHxp/combi-pointify.png" alt="combi-pointify" border="0"></a>
+</p>
 
