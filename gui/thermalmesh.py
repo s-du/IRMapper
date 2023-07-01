@@ -676,92 +676,97 @@ class ThermalWindow(QtWidgets.QMainWindow):
         """
         Function called from the 3D processing button; will create 3D files from image sets
         """
-        dialog = dia.DialogMakeModel()
-        dialog.setWindowTitle("Choose 3d reconstruction parameters")
 
-        # fill list of possible image set
-        possible_sets = []
-        possible_sets_names = []
-        for im_set in self.thermal_process_img_folders:
-            if 'edge' not in im_set:
-                _, desc_im_set = os.path.split(im_set)
-                possible_sets_names.append(desc_im_set)
-                possible_sets.append(im_set)
+        if self.license_path is not None:
+            dialog = dia.DialogMakeModel()
+            dialog.setWindowTitle("Choose 3d reconstruction parameters")
 
-        dialog.fill_comb(possible_sets_names)
+            # fill list of possible image set
+            possible_sets = []
+            possible_sets_names = []
+            for im_set in self.thermal_process_img_folders:
+                if 'edge' not in im_set:
+                    _, desc_im_set = os.path.split(im_set)
+                    possible_sets_names.append(desc_im_set)
+                    possible_sets.append(im_set)
 
-        if dialog.exec_():
-            # get reconstruction options
-            dialog.return_values()
+            dialog.fill_comb(possible_sets_names)
 
-            # thermal images (processed) to use
-            i = dialog.img_set_index
-            thermal_img_folder = possible_sets[i]
-            ir_list = []
-            for file in os.listdir(thermal_img_folder):
-                if 'thermal' in file:
-                    ir_list.append(os.path.join(thermal_img_folder, file))
+            if dialog.exec_():
+                # get reconstruction options
+                dialog.return_values()
 
-            # get user values
-            try:
-                opt_quality = dialog.quality
-                opt_mesh = dialog.do_mesh
-                opt_texture = dialog.texture
-                nb_text = dialog.numb_text
-                opt_ortho = dialog.ortho
-                opt_pdf = dialog.pdf
-                if dialog.point_limit:
-                    point_limit = int(dialog.point_limit)
-                else:
-                    point_limit = 0
-                if dialog.poly_limit:
-                    poly_limit = int(dialog.poly_limit)
-                else:
-                    poly_limit = 0
-            except ValueError:
+                # thermal images (processed) to use
+                i = dialog.img_set_index
+                thermal_img_folder = possible_sets[i]
+                ir_list = []
+                for file in os.listdir(thermal_img_folder):
+                    if 'thermal' in file:
+                        ir_list.append(os.path.join(thermal_img_folder, file))
+
+                # get user values
+                try:
+                    opt_quality = dialog.quality
+                    opt_mesh = dialog.do_mesh
+                    opt_texture = dialog.texture
+                    nb_text = dialog.numb_text
+                    opt_ortho = dialog.ortho
+                    opt_pdf = dialog.pdf
+                    if dialog.point_limit:
+                        point_limit = int(dialog.point_limit)
+                    else:
+                        point_limit = 0
+                    if dialog.poly_limit:
+                        poly_limit = int(dialog.poly_limit)
+                    else:
+                        poly_limit = 0
+                except ValueError:
+                    QtWidgets.QMessageBox.warning(self, "Warning",
+                                                  "Oops! Something wrong with points or poly limits!")
+                    self.go_mesh_phase1()
+
+                print(f'texture size: {opt_texture} \n'
+                      f'quality: {opt_quality} \n'
+                      f' output mesh: {opt_mesh} \n'
+                      f' output ortho: {opt_ortho} \n'
+                      f' output pdf: {opt_pdf} ')
+
+                # new folders
+                # create a new item of type 'reconstruction class'
+                new_threed_folder = ThreedDataset()
+                self.reconstruction_database.append(new_threed_folder)
+
+                number = len(self.reconstruction_database)
+                desc = f'{PROC_3D} (reconstruction {number})'
+                th_mesh_folder = os.path.join(self.app_folder, desc)
+
+                # do thermal processing
+                if not os.path.exists(th_mesh_folder):
+                    os.mkdir(th_mesh_folder)
+
+                print(f'files to process: {ir_list}, and {self.list_rgb_paths}')
+                worker_1 = agisoft_part.RunnerAgisoft(self.drone_model, ir_list, self.list_rgb_paths, th_mesh_folder,
+                                                      5, 100, do_precleaning=True, quality=opt_quality,
+                                                      opt_make_mesh=opt_mesh, nb_text=nb_text, text_size=opt_texture,
+                                                      opt_limit_points=point_limit, opt_limit_poly=poly_limit,
+                                                      opt_make_ortho=opt_ortho, opt_make_pdf=opt_pdf)
+
+                worker_1.signals.progressed.connect(lambda value: self.update_progress(nb=value))
+                worker_1.signals.messaged.connect(lambda string: self.update_progress(text=string))
+
+                self.__pool.start(worker_1)
+
+                # TODO Add check if reconstruction is successful
+                self.reconstruction_database[-1].desc = desc
+                self.reconstruction_database[-1].path = th_mesh_folder
+                self.reconstruction_database[-1].has_pc = True
+                if opt_mesh:
+                    self.reconstruction_database[-1].has_mesh = True
+
+                worker_1.signals.finished.connect(self.go_mesh_phase2)
+            else:
                 QtWidgets.QMessageBox.warning(self, "Warning",
-                                              "Oops! Something wrong with points or poly limits!")
-                self.go_mesh_phase1()
-
-            print(f'texture size: {opt_texture} \n'
-                  f'quality: {opt_quality} \n'
-                  f' output mesh: {opt_mesh} \n'
-                  f' output ortho: {opt_ortho} \n'
-                  f' output pdf: {opt_pdf} ')
-
-            # new folders
-            # create a new item of type 'reconstruction class'
-            new_threed_folder = ThreedDataset()
-            self.reconstruction_database.append(new_threed_folder)
-
-            number = len(self.reconstruction_database)
-            desc = f'{PROC_3D} (reconstruction {number})'
-            th_mesh_folder = os.path.join(self.app_folder, desc)
-
-            # do thermal processing
-            if not os.path.exists(th_mesh_folder):
-                os.mkdir(th_mesh_folder)
-
-            print(f'files to process: {ir_list}, and {self.list_rgb_paths}')
-            worker_1 = agisoft_part.RunnerAgisoft(self.drone_model, ir_list, self.list_rgb_paths, th_mesh_folder,
-                                                  5, 100, do_precleaning=True, quality=opt_quality,
-                                                  opt_make_mesh=opt_mesh, nb_text=nb_text, text_size=opt_texture,
-                                                  opt_limit_points=point_limit, opt_limit_poly=poly_limit,
-                                                  opt_make_ortho=opt_ortho, opt_make_pdf=opt_pdf)
-
-            worker_1.signals.progressed.connect(lambda value: self.update_progress(nb=value))
-            worker_1.signals.messaged.connect(lambda string: self.update_progress(text=string))
-
-            self.__pool.start(worker_1)
-
-            # TODO Add check if reconstruction is successful
-            self.reconstruction_database[-1].desc = desc
-            self.reconstruction_database[-1].path = th_mesh_folder
-            self.reconstruction_database[-1].has_pc = True
-            if opt_mesh:
-                self.reconstruction_database[-1].has_mesh = True
-
-            worker_1.signals.finished.connect(self.go_mesh_phase2)
+                                              "The Agisoft license path was not set! Please use the menu to set the license")
 
     def go_mesh_phase2(self):
         threed_files = tt.find_files_of_type(self.reconstruction_database[-1].path, types=['obj', 'tif', 'ply'])
