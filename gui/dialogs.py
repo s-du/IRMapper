@@ -82,8 +82,10 @@ class AboutDialog(QtWidgets.QDialog):
         self.layout = QtWidgets.QVBoxLayout()
 
         about_text = QtWidgets.QLabel('This app was made by Buildwise, to simplify the analysis of thermal images.'
-                                      ' Start by loading a folder, '
-                                      'then process images.')
+                                      ' Start by loading a DJI folder, then process images as desired. Once a set of '
+                                      'infrared images is processed, the app can use an existing Agisoft Professional'
+                                      ' license to create a thermal point cloud automatically. '
+                                      '\n \n This is still a BETA version!')
         about_text.setWordWrap(True)
 
         logos1 = QtWidgets.QLabel()
