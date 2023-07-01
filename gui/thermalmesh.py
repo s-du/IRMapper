@@ -676,7 +676,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         """
         Function called from the 3D processing button; will create 3D files from image sets
         """
-
+        print(self.license_path)
         if self.license_path is not None:
             dialog = dia.DialogMakeModel()
             dialog.setWindowTitle("Choose 3d reconstruction parameters")
@@ -764,9 +764,9 @@ class ThermalWindow(QtWidgets.QMainWindow):
                     self.reconstruction_database[-1].has_mesh = True
 
                 worker_1.signals.finished.connect(self.go_mesh_phase2)
-            else:
-                QtWidgets.QMessageBox.warning(self, "Warning",
-                                              "The Agisoft license path was not set! Please use the menu to set the license")
+        else:
+            QtWidgets.QMessageBox.warning(self, "Warning",
+                                          "The Agisoft license path was not set! Please use the menu to set the license")
 
     def go_mesh_phase2(self):
         threed_files = tt.find_files_of_type(self.reconstruction_database[-1].path, types=['obj', 'tif', 'ply'])
