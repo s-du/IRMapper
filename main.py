@@ -3,6 +3,7 @@
 # define authorship information
 __authors__ = ['Samuel Dubois']
 __author__ = ','.join(__authors__)
+__contact__ = 'samuel.dubois@buildwise.be'
 __credits__ = []
 __copyright__ = 'Copyright (c) Buildwise 2023'
 __license__ = ''
