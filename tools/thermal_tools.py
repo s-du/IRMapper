@@ -247,16 +247,17 @@ def match_rgb(cv_img, drone_model, resized=False):
                    int(w2 / 2 + 50) - ret_x:int(w2 / 2 + 50) + ret_x]
 
     if drone_model == 'M3T':
-        dim_undis_ir = (604, 469)
+        dim_undis_ir = (602, 467)
         dim_undis_rgb = (3867, 2871)
         aspect_factor = (3867 / 2871) / (
-                    604 / 469)  # this is necessary to transform the aspect ratio of the rgb image to fit
+                602 / 467)  # this is necessary to transform the aspect ratio of the rgb image to fit
         # the thermal image. The number represent the resolutions of images (rgb and ir respectively) after undistording
         new_h = h2 * aspect_factor
-        ret_x = int(0.3265 * w2)
-        ret_y = int(0.3265 * new_h)
-        rgb_dest = cv_img[int(h2 / 2) - ret_y:int(h2 / 2) + ret_y,
-                   int(w2 / 2) - ret_x:int(w2 / 2) + ret_x]
+        ret_x = int(
+            0.3263 * w2)  # this factor was obtained by measuring a similar line on the ir and rgb pictures (both undistorded)
+        ret_y = int(0.3263 * new_h)
+        rgb_dest = cv_img[int(h2 / 2 + 74) - ret_y:int(h2 / 2 + 74) + ret_y,
+                   int(w2 / 2 + 55) - ret_x:int(w2 / 2 + 55) + ret_x]
 
     if resized:
         rgb_dest = cv2.resize(rgb_dest, dim_undis_ir, interpolation=cv2.INTER_AREA)
@@ -290,7 +291,7 @@ def add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path, exif
     if drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':
         dim = (609, 475)
     if drone_model == 'M3T':
-        dim = (604, 469)
+        dim = (602, 467)
     foreground = cv2.resize(foreground, dim, interpolation=cv2.INTER_AREA)
     foreground_float = foreground.astype(float)  # Inputs to blend_modes need to be floats.
 
@@ -377,7 +378,6 @@ def list_th_rgb_images_from_res(img_folder):
     list_rgb_paths = []
     list_ir_paths = []
     for file in os.listdir(img_folder):
-
         path = os.path.join(img_folder, file)
         print(path)
         if file.endswith('.jpg') or file.endswith('.JPG'):
@@ -388,6 +388,9 @@ def list_th_rgb_images_from_res(img_folder):
                 list_ir_paths.append(path)
             else:
                 list_rgb_paths.append(path)
+
+        list_ir_paths.sort()
+        list_rgb_paths.sort()
 
     return list_rgb_paths, list_ir_paths
 
