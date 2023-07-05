@@ -232,6 +232,19 @@ def undis(cv_img, xml_path):
 
 
 # LENS RELATED METHODS (DRONE SPECIFIC)
+def match_rgb_custom_parameters(cv_img, dim_undis_ir, aspect_factor, extend, y_offset, x_offset, resized=False):
+    h2, w2 = cv_img.shape[:2]
+    new_h = h2 * aspect_factor
+    ret_x = int(extend * w2)
+    ret_y = int(extend * new_h)
+    rgb_dest = cv_img[int(h2 / 2 + y_offset) - ret_y:int(h2 / 2 + y_offset) + ret_y,
+               int(w2 / 2 + x_offset) - ret_x:int(w2 / 2 + x_offset) + ret_x]
+
+    if resized:
+        rgb_dest = cv2.resize(rgb_dest, dim_undis_ir, interpolation=cv2.INTER_AREA)
+
+    return rgb_dest
+
 def match_rgb(cv_img, drone_model, resized=False):
     h2, w2 = cv_img.shape[:2]
     if drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':

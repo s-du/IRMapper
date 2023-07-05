@@ -292,6 +292,14 @@ class ThermalWindow(QtWidgets.QMainWindow):
         else:
             self.actionViewMesh.setEnabled(False)
 
+    # Calibration Methods__________________
+    def update_camera_match(self):
+        # store new parameters
+
+        # recompute all rgb crop
+
+        pass
+
     # Workflow Methods_____________________
     def load_img_phase1(self):
         ok_load = True
