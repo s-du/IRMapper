@@ -260,16 +260,16 @@ def match_rgb(cv_img, drone_model, resized=False):
                    int(w2 / 2 + 50) - ret_x:int(w2 / 2 + 50) + ret_x]
 
     if drone_model == 'M3T':
-        dim_undis_ir = (602, 467)
+        dim_undis_ir = (603, 469)
         dim_undis_rgb = (3867, 2871)
         aspect_factor = (3867 / 2871) / (
-                602 / 467)  # this is necessary to transform the aspect ratio of the rgb image to fit
+                603 / 469)  # this is necessary to transform the aspect ratio of the rgb image to fit
         # the thermal image. The number represent the resolutions of images (rgb and ir respectively) after undistording
         new_h = h2 * aspect_factor
         ret_x = int(
-            0.3263 * w2)  # this factor was obtained by measuring a similar line on the ir and rgb pictures (both undistorded)
-        ret_y = int(0.3263 * new_h)
-        rgb_dest = cv_img[int(h2 / 2 + 74) - ret_y:int(h2 / 2 + 74) + ret_y,
+            0.348 * w2)  # this factor was obtained by measuring a similar line on the ir and rgb pictures (both undistorded)
+        ret_y = int(0.348 * new_h)
+        rgb_dest = cv_img[int(h2 / 2 + 55) - ret_y:int(h2 / 2 + 55) + ret_y,
                    int(w2 / 2 + 55) - ret_x:int(w2 / 2 + 55) + ret_x]
 
     if resized:
@@ -304,7 +304,7 @@ def add_lines_from_rgb(cv_ir_img, cv_match_rgb_img, drone_model, dest_path, exif
     if drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':
         dim = (609, 475)
     if drone_model == 'M3T':
-        dim = (602, 467)
+        dim = (603, 469)
     foreground = cv2.resize(foreground, dim, interpolation=cv2.INTER_AREA)
     foreground_float = foreground.astype(float)  # Inputs to blend_modes need to be floats.
 
