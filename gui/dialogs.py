@@ -544,6 +544,7 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.pushButton_advanced.clicked.connect(self.define_options)
         self.pushButton_left.clicked.connect(lambda: self.update_img_to_preview('minus'))
         self.pushButton_right.clicked.connect(lambda: self.update_img_to_preview('plus'))
+
         # Dropdowns
         self.comboBox.currentIndexChanged.connect(self.update_img_preview)
         self.comboBox_colors_low.currentIndexChanged.connect(self.update_img_preview)

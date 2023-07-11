@@ -133,7 +133,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         settings_dir = platformdirs.user_config_dir('IRMapper')
         print(f"User config files should be stored in {platformdirs.user_config_dir('IRMapper')}")
         if not os.path.exists(settings_dir):
-            os.mkdir(settings_dir)
+            os.makedirs(settings_dir)
 
         self.license_loc = os.path.join(settings_dir, 'license_location.txt') # TODO : use settings.json
 
