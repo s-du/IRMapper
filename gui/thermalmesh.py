@@ -36,7 +36,7 @@ class ImageSet:
         self.has_rgb = True
         self.nb_ir_imgs = 0
         self.processed_ir_img = []
-        self.drone_model = ''
+        self.drone_model = None
 
 
 class ThermImage:
@@ -115,7 +115,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
         self.th_threed_folders = []  # list of folders containing thermal meshes
         self.current_dataset = None
         self.reconstruction_database = []  # storing all reconstruction datasets
-        self.drone_model = ''
+        self.drone_model = None
 
         # create overview description
         self.general_overview = ''
@@ -360,12 +360,13 @@ class ThermalWindow(QtWidgets.QMainWindow):
                 self.list_rgb_paths, self.list_ir_paths = tt.list_th_rgb_images_from_res(self.main_folder)
 
                 # get drone model
-                self.drone_model = tt.get_drone_model(self.list_ir_paths[0])
+                drone_name = tt.get_drone_model(self.list_ir_paths[0])
+                self.drone_model = tt.DroneModel(drone_name)
 
-                print(f'Drone model : {self.drone_model}')
+                print(f'Drone model : {drone_name}')
 
                 dictionary = {
-                    "Drone model": self.drone_model,
+                    "Drone model": drone_name,
                     "Number of image pairs": str(len(self.list_ir_paths)),
                     "rgb_paths": self.list_rgb_paths,
                     "ir_paths": self.list_ir_paths
@@ -479,8 +480,9 @@ class ThermalWindow(QtWidgets.QMainWindow):
                     self.update_progress(nb=90, text=text_status)
 
                     # get drone model
-                    self.drone_model = dict['Drone model']
-                    print(f'Drone model : {self.drone_model}')
+                    drone_name = dict['Drone model']
+                    self.drone_model = tt.DroneModel(drone_name)
+                    print(f'Drone model : {drone_name}')
 
                     # check existing folder with past processing
                     list_files = os.listdir(self.app_folder)

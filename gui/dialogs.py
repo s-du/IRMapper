@@ -473,6 +473,8 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.ir_imgs = os.listdir(self.ir_folder)
         self.rgb_imgs = os.listdir(self.rgb_folder)
         self.n_imgs = len(self.ir_imgs)
+        if self.n_imgs > 1:
+            self.pushButton_right.setEnabled(True)
 
         # comboboxes content
         self.out_of_lim = ['black', 'white', 'red']
@@ -517,7 +519,8 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.test_img_path = os.path.join(self.ir_folder, test_img)
 
         # get drone model
-        self.drone_model = tt.get_drone_model(self.test_img_path)
+        drone_name = tt.get_drone_model(self.test_img_path)
+        self.drone_model = tt.DroneModel(drone_name)
 
         # create temporary folder
         self.preview_folder = os.path.join(self.ir_folder, 'preview')
