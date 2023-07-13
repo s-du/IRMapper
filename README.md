@@ -89,15 +89,17 @@ git clone https://github.com/s-du/IRMapper
 
 2. Navigate to the app directory:
 ```
-cd app_directory
+cd IRMapper
 ```
+3. (Optional) Install and activate a virtual environment
 
-3. Install the required dependencies:
+   
+4. Install the required dependencies:
 ```
 pip install -r requirements.txt
 ```
 
-4. Run the app:
+5. Run the app:
 ```
 python main.py
 ```
