@@ -1,6 +1,28 @@
 import os
 import resources as res
 from PySide6 import QtCore, QtGui, QtWidgets
+import subprocess
+import sys
+import pkg_resources
+
+
+def install_agisoft_module():
+    # install Metashape module if necessary
+    def install(package):
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+    metashape_module = res.find('other/Metashape-2.0.1-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl')
+    install(metashape_module)
+
+# check if module is installed
+required = {'metashape'}
+installed = {pkg.key for pkg in pkg_resources.working_set}
+print(installed)
+missing = required - installed
+if missing:
+    print(r"Ok let's intall Agisoft!")
+    install_agisoft_module()
+
 import Metashape
 
 # general parameters
