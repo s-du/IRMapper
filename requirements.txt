@@ -1,0 +1,17 @@
+numpy~=1.24.2
+open3d~=0.16.0
+PySide6~=6.5.0
+Pillow~=9.4.0
+platformdirs~=3.2.0
+opencv-python~=4.7.0.72
+Metashape~=2.0.1
+scipy~=1.11.1
+matplotlib~=3.7.1
+packaging~=23.0
+ConfigArgParse~=1.5.3
+plotly~=5.14.1
+dash~=2.9.2
+Werkzeug~=2.2.3
+ipywidgets~=8.0.6
+traitlets~=5.9.0
+ipython~=8.12.0
