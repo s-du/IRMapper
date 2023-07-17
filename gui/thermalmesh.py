@@ -493,7 +493,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
                             self.thermal_process_img_folders.append(os.path.join(self.app_folder, file))
                             # add image items to tree view
                             tree_desc = f'Thermal processing {len(self.thermal_process_img_folders)}'
-                            if 'edge' in file:
+                            if 'edge' in file or 'tif' in file:
                                 tree_desc += ' ! not compatible with 3d'
                             self.add_item_in_tree(self.model, tree_desc)
 
@@ -575,7 +575,8 @@ class ThermalWindow(QtWidgets.QMainWindow):
                     if self.proc_list:
                         for desc in self.proc_list:
                             if not 'edge' in desc:
-                                self.actionGo3D.setEnabled(True)
+                                if not 'tif' in desc:
+                                    self.actionGo3D.setEnabled(True)
 
                     # update overview
                     #   get json data
@@ -624,15 +625,25 @@ class ThermalWindow(QtWidgets.QMainWindow):
                     k = dialog.comboBox_post.currentIndex()
                     self.post_process = dialog.img_post[k]
 
+                    # check if user wants tiff files
+                    self.tif_output = False
+                    # check if tiff option
+                    if dialog.checkBox_tif.isChecked():
+                        self.tif_output = True
+
                     # create subfolder
                     nummer = len(self.proc_list)
-                    desc = f'{PROC_TH_FOLDER}_{colormap}_{str(round(tmin, 0))}_{str(round(tmax, 0))}_{self.post_process}_image set_{nummer}'
+                    if not self.tif_output:
+                        desc = f'{PROC_TH_FOLDER}_{colormap}_{str(round(tmin, 0))}_{str(round(tmax, 0))}_{self.post_process}_image set_{nummer}'
+                    else:
+                        desc = f'{PROC_TH_FOLDER}_tiff_{str(round(tmin, 0))}_{str(round(tmax, 0))}_image set_{nummer}'
 
                     # append the processing to the list
                     self.proc_list.append(desc)
                     self.thermal_process_img_folders.append(os.path.join(self.app_folder, desc))
                     if not os.path.exists(self.thermal_process_img_folders[-1]):
                         os.mkdir(self.thermal_process_img_folders[-1])
+
 
                     # launch image processing
                     rgb_paths = ''
@@ -645,7 +656,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
                                             dialog.thermal_param, tmin, tmax, colormap,
                                             user_lim_col_high, user_lim_col_low,
                                             5, 100,
-                                            n_colors=n_colors, post_process=self.post_process, rgb_paths = rgb_paths)
+                                            n_colors=n_colors, post_process=self.post_process, rgb_paths = rgb_paths, export_tif = self.tif_output)
                     worker_1.signals.progressed.connect(lambda value: self.update_progress(value))
                     worker_1.signals.messaged.connect(lambda string: self.update_progress(text=string))
 
@@ -663,7 +674,7 @@ class ThermalWindow(QtWidgets.QMainWindow):
 
         # add new files in tree view
         tree_desc = f'Thermal processing {len(self.thermal_process_img_folders)}'
-        if self.post_process == 'edge (from rgb)':
+        if self.post_process == 'edge (from rgb)' or self.tif_output == True:
             tree_desc += ' ! not compatible with 3d'
 
         self.add_item_in_tree(self.model, tree_desc)
@@ -678,7 +689,8 @@ class ThermalWindow(QtWidgets.QMainWindow):
         if self.proc_list:
             for desc in self.proc_list:
                 if not 'edge' in desc:
-                    self.actionGo3D.setEnabled(True)
+                    if not 'tif' in desc:
+                        self.actionGo3D.setEnabled(True)
 
         self.update_progress(nb=100, text="Status: You can now produce 3D data!")
 
@@ -696,9 +708,10 @@ class ThermalWindow(QtWidgets.QMainWindow):
             possible_sets_names = []
             for im_set in self.thermal_process_img_folders:
                 if 'edge' not in im_set:
-                    _, desc_im_set = os.path.split(im_set)
-                    possible_sets_names.append(desc_im_set)
-                    possible_sets.append(im_set)
+                    if 'tif' not in im_set:
+                        _, desc_im_set = os.path.split(im_set)
+                        possible_sets_names.append(desc_im_set)
+                        possible_sets.append(im_set)
 
             dialog.fill_comb(possible_sets_names)
 

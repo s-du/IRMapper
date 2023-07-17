@@ -480,7 +480,7 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.out_of_lim = ['black', 'white', 'red']
         self.out_of_matp = ['k', 'w', 'r']
         self.img_post = ['none', 'smooth', 'sharpen', 'sharpen strong', 'edge (simple)', 'edge (from rgb)']
-        self.colormap_list = ['Artic', 'Iron', 'Rainbow', 'Greys_r', 'Greys', 'plasma', 'inferno', 'coolwarm', 'jet',
+        self.colormap_list = ['Rainbow', 'Iron', 'Artic', 'Greys_r', 'Greys', 'plasma', 'inferno', 'coolwarm', 'jet',
                               'Spectral_r',
                               'cividis', 'viridis', 'gnuplot2']
         self.view_list = ['thermal normal', 'th. undistorted', 'RGB crop']
@@ -559,6 +559,28 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.lineEdit_min_temp.editingFinished.connect(self.update_img_preview)
         self.lineEdit_max_temp.editingFinished.connect(self.update_img_preview)
         self.lineEdit_colors.editingFinished.connect(self.update_img_preview)
+        # tiff checkbox
+        self.checkBox_tif.toggled.connect(self.tif_options)
+
+    def tif_options(self):
+        if self.checkBox_tif.isChecked():
+            self.comboBox.setCurrentIndex(3)
+            self.comboBox.setEnabled(False)
+            self.comboBox.setEnabled(False)
+            self.lineEdit_colors.setEnabled(False)
+            self.comboBox_colors_low.setEnabled(False)
+            self.comboBox_colors_high.setEnabled(False)
+            self.comboBox_post.setCurrentIndex(0)
+            self.comboBox_post.setEnabled(False)
+        else:
+            self.comboBox.setEnabled(True)
+            self.comboBox.setEnabled(True)
+            self.lineEdit_colors.setEnabled(True)
+            self.comboBox_colors_low.setEnabled(True)
+            self.comboBox_colors_high.setEnabled(True)
+            self.comboBox_post.setEnabled(True)
+
+
 
     def define_options(self):
         dialog = DialogThParams(self.thermal_param)
@@ -641,15 +663,16 @@ class DialogPrepareImages(QtWidgets.QDialog):
         self.update_img_preview()
 
         # change buttons
-        if self.current_img == self.n_imgs - 1:
-            self.pushButton_right.setEnabled(False)
-        else:
-            self.pushButton_right.setEnabled(True)
+        if self.n_imgs > 1:
+            if self.current_img == self.n_imgs - 1:
+                self.pushButton_right.setEnabled(False)
+            else:
+                self.pushButton_right.setEnabled(True)
 
-        if self.current_img == 0:
-            self.pushButton_left.setEnabled(False)
-        else:
-            self.pushButton_left.setEnabled(True)
+            if self.current_img == 0:
+                self.pushButton_left.setEnabled(False)
+            else:
+                self.pushButton_left.setEnabled(True)
 
     def update_img_preview(self):
         # fetch user choices
@@ -708,7 +731,7 @@ class DialogPrepareImages(QtWidgets.QDialog):
                 cv_img = tt.cv_read_all_path(dest_path)
 
                 if post_process != 'edge (from rgb)':
-                    undis = tt.undis(cv_img, ir_xml_path)
+                    undis, _ = tt.undis(cv_img, ir_xml_path)
                     tt.cv_write_all_path(undis, dest_path)
 
                 self.viewer.setPhoto(QtGui.QPixmap(dest_path))
