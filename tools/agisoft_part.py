@@ -1,27 +1,35 @@
 import os
 import resources as res
 from PySide6 import QtCore, QtGui, QtWidgets
-import subprocess
 import sys
-import pkg_resources
+
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    print('running in a PyInstaller bundle')
+
+else:
+    print('running in a normal Python process')
+    # if run in Python process, then the app needs to check if Agisoft is installed
+    import subprocess
+    import pkg_resources
 
 
-def install_agisoft_module():
-    # install Metashape module if necessary
-    def install(package):
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    def install_agisoft_module():
+        # install Metashape module if necessary
+        def install(package):
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
-    metashape_module = res.find('other/Metashape-2.0.1-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl')
-    install(metashape_module)
+        metashape_module = res.find('other/Metashape-2.0.1-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl')
+        install(metashape_module)
 
-# check if module is installed
-required = {'metashape'}
-installed = {pkg.key for pkg in pkg_resources.working_set}
-print(installed)
-missing = required - installed
-if missing:
-    print(r"Ok let's intall Agisoft!")
-    install_agisoft_module()
+    # check if module is installed
+    required = {'metashape'}
+    installed = {pkg.key for pkg in pkg_resources.working_set}
+    print(installed)
+    missing = required - installed
+    if missing:
+        print(r"Ok let's intall Agisoft!")
+        install_agisoft_module()
+    
 
 import Metashape
 
@@ -75,9 +83,9 @@ class RunnerAgisoft(QtCore.QRunnable):
         pdf_path = os.path.join(self.output_folder, 'thermal_document.pdf')
 
         # drone model specific data
-        if self.drone_model == 'MAVIC2-ENTERPRISE-ADVANCED':
+        if self.drone_model.name == 'MAVIC2-ENTERPRISE-ADVANCED':
             calib_file = res.find('other/camera_calib_m2t.xml')
-        elif self.drone_model == 'M3T':
+        elif self.drone_model.name == 'M3T':
             calib_file = res.find('other/camera_calib_m3t.xml')
 
         # compute number of steps

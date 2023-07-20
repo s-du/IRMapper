@@ -35,6 +35,7 @@ POTREE_CONV_PATH = res.find('PotreeConverter/PotreeConverter.exe')
 
 class DroneModel():
     def __init__(self,name):
+        self.name = name
         if name == 'MAVIC2-ENTERPRISE-ADVANCED':
             self.rgb_xml_path = m2t_rgb_xml_path
             self.ir_xml_path = m2t_ir_xml_path
